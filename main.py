@@ -18,9 +18,27 @@ import webapp2
 import os
 import jinja2
 
+from google.appengine.ext import db
+
+# jinja2 initialization
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 _external = True
+
+#############
+# DB MODELS #
+#############
+
+## User Database Model
+class User(db.Model):
+    username = db.StringProperty(required = True)
+    password = db.StringProperty(required = True)
+    email = db.StringProperty()
+    created = db.DateTimeProperty(auto_now_add = True)
+
+## Web Page Handler Template
+# Template for which all page handlers inherit from
+# Includes helper functions
 
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -36,12 +54,14 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def get(self):
-        self.render("base.html");
+        self.render("base.html")
 
 
 class SignUpHandler(Handler):
     def get(self):
-        self.render("signup.html");
+        self.render("signup.html")
+
+        
         
 app = webapp2.WSGIApplication([
     ('/', MainHandler), ('/newaccount', SignUpHandler)
