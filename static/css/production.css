@@ -7345,6 +7345,11 @@ button.close {
   }
 }
 /*# sourceMappingURL=bootstrap.css.map */
+.form-error {
+	color: red;
+	margin-bottom: 16px;
+	padding-left: 20px;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**
