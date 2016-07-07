@@ -20,6 +20,7 @@ import jinja2
 import random
 import hashlib
 import string
+import re
 
 from google.appengine.ext import db
 
@@ -97,9 +98,26 @@ class SignUpHandler(Handler):
         user_password = self.request.get('password')
         verify = self.request.get('verify')
         mail = self.request.get('email')
+        user_error = self.getUsernameError(user)
         self.render('signup.html', username = user,
-                    email = mail)
+                    email = mail,
+                    username_error = user_error)
 
+    def valid_username(self, username):
+        user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+        return user_re.match(username)
+
+    def getUsernameError(self, user):
+        if(user):
+            users = db.GqlQuery("SELECT * FROM User WHERE username =:1 LIMIT 1", user)
+            if(users.count() != 0):
+                return "User with that name already exists"
+            elif(not self.valid_username(user)):
+                return 'Please enter a valid username'
+            else:
+                return ''      
+        else:
+            return "No user name entered"
         
         
 app = webapp2.WSGIApplication([

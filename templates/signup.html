@@ -9,7 +9,7 @@
 			<h3 class="text-center">Sign Up</h3>
 			<br>
 			<form class="form-horizontal" method="post">
-				<div class="form-group">
+				<div class="form-group{% if username_error %} has-error{% endif %}">
 					<label for="username" class="col-sm-4 control-label">User Name</label>
 					<div class="col-sm-8">
 						<input class="form-control" id="username" name="username" placeholder="User Name" value="{{username}}">
