@@ -17,6 +17,9 @@
 import webapp2
 import os
 import jinja2
+import random
+import hashlib
+import string
 
 from google.appengine.ext import db
 
@@ -24,6 +27,7 @@ from google.appengine.ext import db
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 _external = True
+
 
 #############
 # DB MODELS #
@@ -35,6 +39,33 @@ class User(db.Model):
     password = db.StringProperty(required = True)
     email = db.StringProperty()
     created = db.DateTimeProperty(auto_now_add = True)
+
+    @classmethod
+    def by_id(cls, uid):
+        return db.GqlQuery('SELECT * FROM User WHERE __key__ = KEY(\'User\', %s)' % int(uid)).get()
+
+    @classmethod
+    def by_name(cls, name):
+        return User.all().filter('name =', name).get()
+
+    @classmethod
+    def register(cls, name, pw, email = None):
+        pw_hash = cls.make_pw_hash(name, pw, cls.make_salt())
+        return User(username = name,
+                    password = pw_hash,
+                    email = email)
+
+    @classmethod
+    def make_pw_hash(cls, name, pw, salt):
+        return hashlib.sha256(name+pw+salt).hexdigest()+"|"+salt
+
+    @classmethod
+    def make_salt(cls):
+        retval = ""
+        for i in range(0,5):
+            retval = retval + random.choice(string.ascii_letters)
+        return retval
+        
 
 ## Web Page Handler Template
 # Template for which all page handlers inherit from
