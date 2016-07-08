@@ -99,9 +99,11 @@ class SignUpHandler(Handler):
         verify = self.request.get('verify')
         mail = self.request.get('email')
         user_error = self.getUsernameError(user)
+        pass_error = self.getPassword1Error(user_password, verify)
         self.render('signup.html', username = user,
                     email = mail,
-                    username_error = user_error)
+                    username_error = user_error,
+                    password_error = pass_error)
 
     def valid_username(self, username):
         user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -118,7 +120,18 @@ class SignUpHandler(Handler):
                 return ''      
         else:
             return "No user name entered"
-        
+
+    def valid_password(self, password):
+        pass_re = re.compile(r"^.{3,20}$")
+        return pass_re.match(password)
+
+    def getPassword1Error(self, password, verify):
+        if(password):
+            if(not self.valid_password(password)):
+                return "Please enter a valid password"
+            return ''
+        else:
+            return "Please enter a password"
         
 app = webapp2.WSGIApplication([
     ('/', MainHandler), ('/newaccount', SignUpHandler)
