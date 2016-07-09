@@ -21,6 +21,8 @@ import random
 import hashlib
 import string
 import re
+import hmac
+import time
 
 from google.appengine.ext import db
 
@@ -29,6 +31,8 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 _external = True
 
+# Hash secret value
+secret = "aeEVC821md8D8KJid810123EMdieMDCHZPQlaelD"
 
 #############
 # DB MODELS #
@@ -52,6 +56,8 @@ class User(db.Model):
 
     @classmethod
     def register(cls, name, pw, email = None):
+        if(not email):
+            email = None
         pw_hash = cls.make_pw_hash(name, pw, cls.make_salt())
         return User(username = name,
                     password = pw_hash,
@@ -88,6 +94,30 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
+    def make_secure_val(self, val):
+        return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
+
+    def check_secure_val(self, secure_val):
+        val = secure_val.split('|')[0]
+        if(secure_val == self.make_secure_val(val)):
+            return val
+
+    def set_secure_cookie(self, name, val):
+        cookie_val = self.make_secure_val(val)
+        self.response.headers.add_header('Set-Cookie',
+                                         '%s=%s; Path=/' % (name, cookie_val))
+
+    def read_secure_cookie(self, name):
+        cookie_val = self.request.cookies.get(name)
+        return self.check_secure_val(cookie_val)
+
+    def login(self, user):
+        self.set_secure_cookie('user_id', str(user.key().id()))
+
+    def logout(self):
+        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+    
+
 ## Main Page Handler
 # Handles requests for the '/' url
 
@@ -113,12 +143,20 @@ class SignUpHandler(Handler):
         pass_error = self.getPassword1Error(user_password, verify)
         ver_error = self.getPassword2Error(user_password, verify)
         em_error = self.getEmailError(mail)
-        self.render('signup.html', username = user,
-                    email = mail,
-                    username_error = user_error,
-                    password_error = pass_error,
-                    email_error = em_error,
-                    verify_error = ver_error)
+        if user_error or pass_error or ver_error or em_error:
+            self.render('signup.html', username = user,
+                        email = mail,
+                        username_error = user_error,
+                        password_error = pass_error,
+                        email_error = em_error,
+                        verify_error = ver_error)
+            return
+        u = User.register(user, user_password, mail)
+        u.put()
+        self.login(u)
+        time.sleep(1)
+        self.redirect('/')
+        
 
     # returns true if a username string is valid
     def valid_username(self, username):
