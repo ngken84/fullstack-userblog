@@ -43,7 +43,8 @@ class User(db.Model):
 
     @classmethod
     def by_id(cls, uid):
-        return db.GqlQuery('SELECT * FROM User WHERE __key__ = KEY(\'User\', %s)' % int(uid)).get()
+        return db.GqlQuery("SELECT * FROM User WHERE __key__ = KEY"
+                           "(\'User\', %s)" % int(uid)).get()
 
     @classmethod
     def by_name(cls, name):
@@ -68,6 +69,10 @@ class User(db.Model):
         return retval
         
 
+#####################
+# Web Page Handlers #
+#####################
+
 ## Web Page Handler Template
 # Template for which all page handlers inherit from
 # Includes helper functions
@@ -83,39 +88,53 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
+## Main Page Handler
+# Handles requests for the '/' url
 
 class MainHandler(Handler):
     def get(self):
         self.render("base.html")
 
+## Sign Up Page Handler
+# Handles requests for the '/newaccount' url
 
 class SignUpHandler(Handler):
     def get(self):
         self.render("signup.html")
 
     def post(self):
+        # get all post parameters
         user = self.request.get('username')
         user_password = self.request.get('password')
         verify = self.request.get('verify')
         mail = self.request.get('email')
+        #get all error messages
         user_error = self.getUsernameError(user)
         pass_error = self.getPassword1Error(user_password, verify)
         ver_error = self.getPassword2Error(user_password, verify)
+        em_error = self.getEmailError(mail)
         self.render('signup.html', username = user,
                     email = mail,
                     username_error = user_error,
                     password_error = pass_error,
+                    email_error = em_error,
                     verify_error = ver_error)
 
+    # returns true if a username string is valid
     def valid_username(self, username):
         user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
         return user_re.match(username)
 
+    # returns error message if passed username is invalid
+    # returns empty string if passed username is valid
     def getUsernameError(self, user):
         if(user):
-            users = db.GqlQuery("SELECT * FROM User WHERE username =:1 LIMIT 1", user)
+            users = db.GqlQuery("SELECT * FROM User WHERE "
+                                " username =:1 LIMIT 1", user)
+            # Is a user already exists with the same username?
             if(users.count() != 0):
                 return "User with that name already exists"
+            # Is the username valid
             elif(not self.valid_username(user)):
                 return 'Please enter a valid username'
             else:
@@ -123,10 +142,13 @@ class SignUpHandler(Handler):
         else:
             return "No user name entered"
 
+    # returns true if passed password is valid
     def valid_password(self, password):
         pass_re = re.compile(r"^.{3,20}$")
         return pass_re.match(password)
-
+    
+    # returns an error message string if the passed password is invalid
+    # returns an empty string if the passed password is valid
     def getPassword1Error(self, password, verify):
         if(password):
             if(not self.valid_password(password)):
@@ -135,6 +157,9 @@ class SignUpHandler(Handler):
         else:
             return "Please enter a password"
 
+    # returns an error message string if the passed password & verify
+    # inputs are invalid
+    # return an empty string if they are valid
     def getPassword2Error(self, password, verify):
         if(password and verify):
             if(verify != password):
@@ -142,7 +167,26 @@ class SignUpHandler(Handler):
             return ''
         else:
             return "Please enter both password and confirm password fields"
-        
+
+    # returns true if passed email address is a valid formated email
+    def valid_email(self, email):
+        email_re = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
+        return email_re.match(email)
+
+    # returns an error message string if the passed email address is invalid
+    # returns and empty string if passed email is valid
+    def getEmailError(self, email):
+        if(email):
+            if(not self.valid_email(email)):
+                return "Please enter a valid email"
+            emails = db.GqlQuery("SELECT * FROM User WHERE email =:1"
+                                 "LIMIT 1", email)
+            if(emails.count() != 0):
+                return "A user with that email account is already registered"
+            return ''
+        else:
+            return ''
+
         
 app = webapp2.WSGIApplication([
     ('/', MainHandler), ('/newaccount', SignUpHandler)
