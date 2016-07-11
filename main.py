@@ -53,7 +53,8 @@ class User(db.Model):
 
     @classmethod
     def by_name(cls, name):
-        return User.all().filter('name =', name).get()
+        u = User.all().filter('username =', name).get()
+        return u
 
     @classmethod
     def register(cls, name, pw, email = None):
@@ -293,12 +294,15 @@ class SignInHandler(Handler):
                         username = user,
                         username_error = usr_error)
             return
-        self.render("signin.html")
-            
-
-
-                    
-            
+        salt = user_obj.password.split("|")[1]
+        if not user_obj.password == User.make_pw_hash(user, user_password, salt):
+            self.render("signin.html",
+                        username = user,
+                        password_error = 'Invalid password')
+            return
+        self.login(user_obj)
+        self.redirect('/')
+           
         
 
 
