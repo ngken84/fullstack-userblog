@@ -264,6 +264,43 @@ class SignInHandler(Handler):
     def get(self):
         self.render("signin.html")
 
+    def post(self):
+        # get post parameters
+        user = self.request.get('username')
+        user_password = self.request.get('password')
+
+        usr_error = ''
+        pss_error = ''
+
+        if not user:
+            usr_error = 'Please enter your user name'
+
+        if not user_password:
+            pss_error = 'Please enter your password'
+
+        if usr_error or pss_error:
+            self.render("signin.html",
+                        username = user,
+                        username_error = usr_error,
+                        password_error = pss_error)
+            return
+        
+        user_obj = User.by_name(user)
+
+        if not user_obj:
+            usr_error = 'User does not exist by that user name'
+            self.render("signin.html",
+                        username = user,
+                        username_error = usr_error)
+            return
+        self.render("signin.html")
+            
+
+
+                    
+            
+        
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
