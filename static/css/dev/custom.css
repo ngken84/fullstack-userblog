@@ -3,3 +3,8 @@
 	margin-bottom: 16px;
 	padding-left: 20px;
 }
+
+.star-shadow {
+	text-shadow: 2px -2px 10px goldenrod, 2px -2px 10px goldenrod;
+	color: gold;
+}

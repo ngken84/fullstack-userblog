@@ -23,6 +23,7 @@ import string
 import re
 import hmac
 import time
+import logging
 
 from google.appengine.ext import db
 
@@ -109,14 +110,26 @@ class Handler(webapp2.RequestHandler):
 
     def read_secure_cookie(self, name):
         cookie_val = self.request.cookies.get(name)
-        return self.check_secure_val(cookie_val)
+        if(cookie_val):
+            return self.check_secure_val(cookie_val)
+
+    def remove_cookie(self, name):
+        self.response.headers.add_header('Set-Cookie', '%s=; Path=/' % name)
 
     def login(self, user):
         self.set_secure_cookie('user_id', str(user.key().id()))
 
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
-    
+
+    def initialize(self, *a, **kw):
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        logging.info('MyHandlerTemplate::initialize')
+        uid = self.read_secure_cookie('user_id')
+        logging.info(uid)
+        if uid:
+            self.user = User.by_id(int(uid))
+            
 
 ## Main Page Handler
 # Handles requests for the '/' url
@@ -138,11 +151,12 @@ class SignUpHandler(Handler):
         user_password = self.request.get('password')
         verify = self.request.get('verify')
         mail = self.request.get('email')
-        #get all error messages
+        # get all error messages
         user_error = self.getUsernameError(user)
         pass_error = self.getPassword1Error(user_password, verify)
         ver_error = self.getPassword2Error(user_password, verify)
         em_error = self.getEmailError(mail)
+        # if error message exists, reloade the sign up page with errors
         if user_error or pass_error or ver_error or em_error:
             self.render('signup.html', username = user,
                         email = mail,
@@ -151,11 +165,14 @@ class SignUpHandler(Handler):
                         email_error = em_error,
                         verify_error = ver_error)
             return
+        # no error messages found, register user and redirect to
+        # welcome page
         u = User.register(user, user_password, mail)
         u.put()
+        self.set_secure_cookie('new','new')
         self.login(u)
         time.sleep(1)
-        self.redirect('/')
+        self.redirect('/welcome')
         
 
     # returns true if a username string is valid
@@ -225,7 +242,32 @@ class SignUpHandler(Handler):
         else:
             return ''
 
-        
+
+## Welcome Page Handler
+# Handles requests for the '/welcome' url
+
+class WelcomeHandler(Handler):
+    def get(self):
+        new_cookie = self.read_secure_cookie('new')
+        # if doesn't have 'new' cookie or is not logged in redirect
+        # to default page
+        if(not new_cookie or not new_cookie == 'new' or not self.user):
+            self.redirect('/')
+            return
+        self.remove_cookie('new')
+        self.render("welcome.html", user = self.user)
+
+## Blog Splash Page Handler
+# Handles requests for the '/blog' url
+
+class SignInHandler(Handler):
+    def get(self):
+        self.render("signin.html")
+
+
 app = webapp2.WSGIApplication([
-    ('/', MainHandler), ('/newaccount', SignUpHandler)
+    ('/', MainHandler),
+    ('/newaccount', SignUpHandler),
+    ('/welcome', WelcomeHandler),
+    ('/signin', SignInHandler)
 ], debug=True)
