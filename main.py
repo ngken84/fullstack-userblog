@@ -137,7 +137,8 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def get(self):
-        self.render("base.html")
+        self.render("base.html",
+                    user = self.user)
 
 ## Sign Up Page Handler
 # Handles requests for the '/newaccount' url
