@@ -75,7 +75,18 @@ class User(db.Model):
         for i in range(0,5):
             retval = retval + random.choice(string.ascii_letters)
         return retval
-        
+
+
+## User Blog Post Model
+class BlogPost(db.Model):
+    subject = db.StringProperty(required = True)
+    blog = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+    username = db.StringProperty(required = True)
+    like_count = db.IntegerProperty()
+
+    
+    
 
 #####################
 # Web Page Handlers #
@@ -305,11 +316,19 @@ class SignInHandler(Handler):
         self.redirect('/')
            
         
+## Logout Page Handler
+# Handles requests for the '/logout' url
 
+class LogoutHandler(Handler):
+    def get(self):
+        self.response.delete_cookie('user_id')
+        self.redirect('/signin')
+        
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/newaccount', SignUpHandler),
     ('/welcome', WelcomeHandler),
-    ('/signin', SignInHandler)
+    ('/signin', SignInHandler),
+    ('/logout', LogoutHandler)
 ], debug=True)
