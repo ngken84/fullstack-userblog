@@ -270,8 +270,8 @@ class WelcomeHandler(Handler):
         self.remove_cookie('new')
         self.render("welcome.html", user = self.user)
 
-## Blog Splash Page Handler
-# Handles requests for the '/blog' url
+## Sign In Page Handler
+# Handles requests for the '/signin' url
 
 class SignInHandler(Handler):
     def get(self):
