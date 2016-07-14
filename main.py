@@ -141,6 +141,8 @@ class Handler(webapp2.RequestHandler):
         logging.info(uid)
         if uid:
             self.user = User.by_id(int(uid))
+        else:
+            self.user = None
             
 
 ## Main Page Handler
@@ -148,8 +150,11 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def get(self):
-        self.render("base.html",
-                    user = self.user)
+        if self.user:
+            self.render("base.html", user = self.user)
+        else:
+            self.render("base.html")
+        
 
 ## Sign Up Page Handler
 # Handles requests for the '/newaccount' url
@@ -323,12 +328,25 @@ class LogoutHandler(Handler):
     def get(self):
         self.response.delete_cookie('user_id')
         self.redirect('/signin')
-        
+
+
+## New Blog Page Handler
+# Handles requests for the '/blog/newpost' url
+
+class NewPostHandler(Handler):
+    def get(self):
+        if(not self.user):
+            self.redirect('../signin')
+            return
+        self.render('newpost.html',
+                    user = self.user)
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/newaccount', SignUpHandler),
     ('/welcome', WelcomeHandler),
     ('/signin', SignInHandler),
-    ('/logout', LogoutHandler)
+    ('/logout', LogoutHandler),
+    ('/newpost', NewPostHandler)
 ], debug=True)
