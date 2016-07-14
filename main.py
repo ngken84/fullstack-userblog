@@ -341,6 +341,13 @@ class NewPostHandler(Handler):
         self.render('newpost.html',
                     user = self.user)
 
+    def post(self):
+        if not self.user:
+            self.redirect('../signin')
+            return
+        self.redirect('../')
+        
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
@@ -348,5 +355,5 @@ app = webapp2.WSGIApplication([
     ('/welcome', WelcomeHandler),
     ('/signin', SignInHandler),
     ('/logout', LogoutHandler),
-    ('/newpost', NewPostHandler)
+    ('/blog/newpost', NewPostHandler)
 ], debug=True)
