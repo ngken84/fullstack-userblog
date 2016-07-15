@@ -345,6 +345,32 @@ class NewPostHandler(Handler):
         if not self.user:
             self.redirect('../signin')
             return
+
+        # get post parameters
+        sub = self.request.get('subject')
+        body = self.request.get('blog-text')
+
+        sub_error = ''
+        body_error = ''
+
+        # set error is subject is empty
+        if not sub:
+            sub_error = 'Please enter a subject'
+
+        # set error if body is empty
+        if not body:
+            body_error = 'Please enter some text'
+
+        # if error message is set, render page with errors
+        if body_error or sub_error:
+            self.render('newpost.html',
+                        user = self.user,
+                        subject = sub,
+                        body_text = body,
+                        subject_error = sub_error,
+                        body_error = body_error)
+            return
+         
         self.redirect('../')
         
 
