@@ -307,6 +307,7 @@ class SignInHandler(Handler):
         user = self.request.get('username')
         user_password = self.request.get('password')
 
+        #determine errors
         usr_error = ''
         pss_error = ''
 
@@ -316,27 +317,34 @@ class SignInHandler(Handler):
         if not user_password:
             pss_error = 'Please enter your password'
 
+        # if errors exists re-render pages with errors
         if usr_error or pss_error:
             self.render("signin.html",
                         username = user,
                         username_error = usr_error,
                         password_error = pss_error)
             return
-        
+
+        # gets user
         user_obj = User.by_name(user)
 
+        # if user does not exists re-render page with errors
         if not user_obj:
             usr_error = 'User does not exist by that user name'
             self.render("signin.html",
                         username = user,
                         username_error = usr_error)
             return
+
+        # check if password matches, if fails 
         salt = user_obj.password.split("|")[1]
         if not user_obj.password == User.make_pw_hash(user, user_password, salt):
             self.render("signin.html",
                         username = user,
                         password_error = 'Invalid password')
             return
+
+        
         self.login(user_obj)
         self.redirect('/')
            
@@ -396,6 +404,7 @@ class NewPostHandler(Handler):
                      username = self.user.username,
                      like_count = 0)
         b.put()
+        memcache.delete('top')
         self.redirect('../')
         
 
