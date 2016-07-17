@@ -25,6 +25,7 @@ import hmac
 import time
 import logging
 
+from google.appengine.api import memcache
 from google.appengine.ext import db
 
 # jinja2 initialization
@@ -85,7 +86,22 @@ class BlogPost(db.Model):
     username = db.StringProperty(required = True)
     like_count = db.IntegerProperty()
 
-    
+    @classmethod
+    def latest_by_name(cls, name):
+        posts = db.GqlQuery("SELECT * FROM BlogPost WHERE username = '%s' "
+                            "ORDER BY created DESC LIMIT 10")
+        posts = list(posts)
+        return posts
+
+    @classmethod
+    def get_latest(cls, update = False):
+        posts = memcache.get('top')
+        if posts is None or update:
+            posts = db.GqlQuery('SELECT * FROM BlogPost ORDER BY created DESC LIMIT 10')
+            posts = list(posts)
+            memcache.set('top_querytime', time.time())
+            memcache.set('top', posts)
+        return posts
     
 
 #####################
@@ -150,10 +166,14 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def get(self):
+        all_posts = BlogPost.get_latest()
         if self.user:
-            self.render("base.html", user = self.user)
+            self.render("index.html",
+                        user = self.user,
+                        posts = all_posts)
         else:
-            self.render("base.html")
+            self.render("index.html",
+                        posts = all_posts)
         
 
 ## Sign Up Page Handler
@@ -370,7 +390,12 @@ class NewPostHandler(Handler):
                         subject_error = sub_error,
                         body_error = body_error)
             return
-         
+
+        b = BlogPost(subject = sub,
+                     blog = body,
+                     username = self.user.username,
+                     like_count = 0)
+        b.put()
         self.redirect('../')
         
 
