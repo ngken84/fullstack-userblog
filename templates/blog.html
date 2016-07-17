@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+	{% for blogpost in posts %}
+		<div class="col-sm-12">
+			<h3>{{blogpost.subject}}</h3>
+			<p>{{blogpost.blog}}</p>
+		</div>
+	{% endfor %}
+</div>
+
+{% endblock %}

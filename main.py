@@ -89,7 +89,7 @@ class BlogPost(db.Model):
     @classmethod
     def latest_by_name(cls, name):
         posts = db.GqlQuery("SELECT * FROM BlogPost WHERE username = '%s' "
-                            "ORDER BY created DESC LIMIT 10")
+                            "ORDER BY created DESC LIMIT 10" % name)
         posts = list(posts)
         return posts
 
@@ -416,7 +416,10 @@ class BlogHandler(Handler):
         if(not self.user):
             self.redirect('../signin')
             return
-        self.render("welcome.html", user = self.user)
+        p = BlogPost.latest_by_name(self.user.username)
+        self.render("blog.html",
+                    user = self.user,
+                    posts = p)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
