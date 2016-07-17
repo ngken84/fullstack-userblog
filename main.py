@@ -97,7 +97,8 @@ class BlogPost(db.Model):
     def get_latest(cls, update = False):
         posts = memcache.get('top')
         if posts is None or update:
-            posts = db.GqlQuery('SELECT * FROM BlogPost ORDER BY created DESC LIMIT 10')
+            posts = db.GqlQuery("SELECT * FROM BlogPost "
+                                " ORDER BY created DESC LIMIT 10")
             posts = list(posts)
             memcache.set('top_querytime', time.time())
             memcache.set('top', posts)
@@ -407,7 +408,15 @@ class NewPostHandler(Handler):
         memcache.delete('top')
         self.redirect('../')
         
+## New Blog Page Handler
+# Handles requests for the '/blog/newpost' url
 
+class BlogHandler(Handler):
+    def get(self):
+        if(not self.user):
+            self.redirect('../signin')
+            return
+        self.render("welcome.html", user = self.user)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
@@ -415,5 +424,6 @@ app = webapp2.WSGIApplication([
     ('/welcome', WelcomeHandler),
     ('/signin', SignInHandler),
     ('/logout', LogoutHandler),
-    ('/blog/newpost', NewPostHandler)
+    ('/blog/newpost', NewPostHandler),
+    ('/blog/?', BlogHandler)
 ], debug=True)
