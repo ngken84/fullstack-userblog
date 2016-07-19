@@ -421,6 +421,25 @@ class BlogHandler(Handler):
                     user = self.user,
                     posts = p)
 
+
+## New Blog Page Handler
+# Handles requests for the '/blog/(\d+)/?' url
+
+class BlogPostHandler(Handler):
+    def get(self, blog_id):
+        p = BlogPost.get_by_id(int(blog_id))
+        if p:
+            if self.user:
+                self.render("blogpost.html",
+                            user = self.user,
+                            blogpost = p)
+            else:
+                self.render("blogpost.html",
+                            blogpost = p)
+        else:
+            self.redirect('../')
+                        
+
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/newaccount', SignUpHandler),
@@ -428,5 +447,6 @@ app = webapp2.WSGIApplication([
     ('/signin', SignInHandler),
     ('/logout', LogoutHandler),
     ('/blog/newpost', NewPostHandler),
-    ('/blog/?', BlogHandler)
+    ('/blog/?', BlogHandler),
+    ('/blog/(\d+)/?', BlogPostHandler)
 ], debug=True)

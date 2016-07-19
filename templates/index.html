@@ -5,7 +5,7 @@
 <div class="row">
 	{% for blogpost in posts %}
 		<div class="col-sm-4">
-			<h3>{{blogpost.subject}}</h3>
+			<a href="/blog/{{blogpost.key().id()}}"><h3>{{blogpost.subject}}</h3></a>
 			<p>{{blogpost.blog}}</p>
 		</div>
 	{% endfor %}
