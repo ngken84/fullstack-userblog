@@ -102,7 +102,7 @@ class BlogPostLikes(db.Model):
     username = db.StringProperty(required = True)
 
     @classmethod
-    def has_user_liked_post(cls, post_id, user):
+    def has_user_liked(cls, post_id, user):
         likes = db.GqlQuery("SELECT * FROM BlogPostLikes "
                             " WHERE post_key_id = %s AND "
                             " username = '%s' " % (post_id, user))

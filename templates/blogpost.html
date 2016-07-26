@@ -12,6 +12,7 @@
 	<div class="col-sm-12 text-right">
 		{% if can_like %}
 			<form method="post">
+				<input type="hidden" value="like" name="like">
 				<button class="no-style-button">
 					<span class="like-style">♥</span>
 					{% if not blogpost.like_count %}
@@ -29,7 +30,13 @@
 				{{blogpost.like_count}}
 			{% endif %}
 		{% endif %}
-
 	</div>
+	{% if errormsg %}
+		<div class="row">
+			<div class="col-sm-12 text-center">
+				{{errormsg}}
+			</div>
+		</div>
+	{% endif %}
 
 {% endblock %}

@@ -354,16 +354,61 @@ class BlogPostHandler(Handler):
     def get(self, blog_id):
         p = BlogPost.get_by_id(int(blog_id))
         if p:
-            myuser = None    
+            myuser = None
+            can_like = False
             if self.user:
                 myuser = self.user
-            can_like = True
+                can_like = not BlogPostLikes.has_user_liked(blog_id, myuser.username)
             self.render("blogpost.html",
                             user = myuser,
                             can_like = can_like,
                             blogpost = p)
         else:
             self.redirect('../')
+
+    def post(self, blog_id):
+        p = BlogPost.get_by_id(int(blog_id))
+
+        # if post is not found, redirect
+        if not p:
+            self.redirect('../')
+            return
+
+        # if user is not logged in, display error message
+        myuser = self.user
+        if not myuser:
+            self.render("blogpost.html",
+                        user = myuser,
+                        can_like = False,
+                        blogpost = p,
+                        errormsg = "You must be logged in to perform that action")
+            return
+
+        # if has post parameter 'like' then it is a like
+        if self.request.get('like') == 'like':
+            can_like = not BlogPostLikes.has_user_liked(blog_id, myuser.username)
+            if not can_like:
+                self.render("blogpost.html",
+                            user = myuser,
+                            can_like = can_like,
+                            blogpost = p,
+                            errormsg = "You have already 'liked' this post")
+            else:
+                new_like = BlogPostLikes(post_key_id = int(blog_id),
+                                         username = myuser.username)
+                new_like.put()
+                p.like_count = p.like_count + 1
+                p.put()
+                self.render("blogpost.html",
+                        user = myuser,
+                        can_like = False,
+                        blogpost = p)
+        else:
+            self.redirect('../')
+        
+
+        
+            
                         
 
 app = webapp2.WSGIApplication([
