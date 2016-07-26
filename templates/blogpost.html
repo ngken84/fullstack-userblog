@@ -31,12 +31,40 @@
 			{% endif %}
 		{% endif %}
 	</div>
-	{% if errormsg %}
-		<div class="row">
-			<div class="col-sm-12 text-center">
-				{{errormsg}}
+</div>
+{% if errormsg %}
+	<div class="row">
+		<div class="col-sm-12 text-center">
+			{{errormsg}}
+		</div>
+	</div>
+{% endif %}
+<div class="row">
+	<div class="col-sm-12">
+		<h4>Comments</h4>
+	</div>
+</div>
+{% if user %}
+	<form method="post">
+		<div class="form-group">
+			<label for="newComment">New Comment</label>
+			<textarea class="form-control" rows="3" name="newComment"></textarea>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-12 text-right">
+				<button type="submit" class="btn btn-default">Post Comment</button>
 			</div>
 		</div>
-	{% endif %}
+	</form>
+{% endif %}
+{% if comments and len(comments) > 0 %}
+
+{% else %}
+	<div class="row">
+		<div class="col-sm-12">
+			No comments...
+		</div>
+	</div>
+{% endif %}
 
 {% endblock %}
