@@ -10,7 +10,26 @@
 </div>
 <div class="row">
 	<div class="col-sm-12 text-right">
-		<span class="like-style">♥</span> {% if not blogpost.like_count %}0{% else %}{{blogpost.like_count}}{% endif %}
+		{% if can_like %}
+			<form method="post">
+				<button class="no-style-button">
+					<span class="like-style">♥</span>
+					{% if not blogpost.like_count %}
+						0
+					{% else %}
+						{{blogpost.like_count}}
+					{% endif %}
+				</button>
+			</form>
+		{% else %}
+			<span class="like-style">♥</span>
+			{% if not blogpost.like_count %}
+				0
+			{% else %}
+				{{blogpost.like_count}}
+			{% endif %}
+		{% endif %}
+
 	</div>
 
 {% endblock %}

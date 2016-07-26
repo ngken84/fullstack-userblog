@@ -354,12 +354,13 @@ class BlogPostHandler(Handler):
     def get(self, blog_id):
         p = BlogPost.get_by_id(int(blog_id))
         if p:
+            myuser = None    
             if self.user:
-                self.render("blogpost.html",
-                            user = self.user,
-                            blogpost = p)
-            else:
-                self.render("blogpost.html",
+                myuser = self.user
+            can_like = True
+            self.render("blogpost.html",
+                            user = myuser,
+                            can_like = can_like,
                             blogpost = p)
         else:
             self.redirect('../')

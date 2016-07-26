@@ -7365,6 +7365,14 @@ button.close {
 	border-radius: 15px 50px 50px 15px;
 	padding: 0px 15px 0px 10px;
 }
+
+.no-style-button {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	font-family: inherit;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**
