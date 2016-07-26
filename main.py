@@ -351,6 +351,11 @@ class BlogHandler(Handler):
 # Handles requests for the '/blog/(\d+)/?' url
 
 class BlogPostHandler(Handler):
+
+    @classmethod
+    def can_user_like(cls, user, post_id, username):
+        return not BlogPostLikes.has_user_liked(post_id, username) and not user.username == username
+    
     def get(self, blog_id):
         p = BlogPost.get_by_id(int(blog_id))
         if p:
@@ -358,7 +363,7 @@ class BlogPostHandler(Handler):
             can_like = False
             if self.user:
                 myuser = self.user
-                can_like = not BlogPostLikes.has_user_liked(blog_id, myuser.username)
+                can_like = BlogPostHandler.can_user_like(myuser, blog_id, myuser.username)
             self.render("blogpost.html",
                             user = myuser,
                             can_like = can_like,
@@ -387,12 +392,18 @@ class BlogPostHandler(Handler):
         # if has post parameter 'like' then it is a like
         if self.request.get('like') == 'like':
             can_like = not BlogPostLikes.has_user_liked(blog_id, myuser.username)
-            if not can_like:
+            if BlogPostLikes.has_user_liked(blog_id, myuser.username):
                 self.render("blogpost.html",
                             user = myuser,
                             can_like = can_like,
                             blogpost = p,
                             errormsg = "You have already 'liked' this post")
+            elif myuser.username == p.username:
+                self.render("blogpost.html",
+                            user = myuser,
+                            can_like = can_like,
+                            blogpost = p,
+                            errormsg = "You can't like your own post")
             else:
                 new_like = BlogPostLikes(post_key_id = int(blog_id),
                                          username = myuser.username)
