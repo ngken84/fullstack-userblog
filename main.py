@@ -103,7 +103,21 @@ class BlogPost(db.Model):
             memcache.set('top_querytime', time.time())
             memcache.set('top', posts)
         return posts
-    
+
+## Blog Post Likes Model
+class BlogPostLikes(db.Model):
+    post_key_id = db.IntegerProperty()
+    username = db.StringProperty(required = True)
+
+    @classmethod
+    def has_user_liked_post(cls, post_id, user):
+        likes = db.GqlQuery("SELECT * FROM BlogPostLikes "
+                            " WHERE post_key_id = %s AND "
+                            " username = '%s' " % (post_id, user))
+        likes = list(likes)
+        return len(likes) > 0
+        
+        
 
 #####################
 # Web Page Handlers #
