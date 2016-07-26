@@ -7355,6 +7355,16 @@ button.close {
 	text-shadow: 2px -2px 10px goldenrod, 2px -2px 10px goldenrod;
 	color: gold;
 }
+
+.like-style {
+	font-size: 15px;
+	color: firebrick;
+	display: inline-block;
+	border: 1px solid grey;
+	background-color: white;
+	border-radius: 15px 50px 50px 15px;
+	padding: 0px 15px 0px 10px;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**

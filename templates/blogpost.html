@@ -8,5 +8,9 @@
 		<p>{{blogpost.blog}}</p>
 	</div>
 </div>
+<div class="row">
+	<div class="col-sm-12 text-right">
+		<span class="like-style">♥</span> {% if not blogpost.like_count %}0{% else %}{{blogpost.like_count}}{% endif %}
+	</div>
 
 {% endblock %}
