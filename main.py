@@ -26,7 +26,7 @@ from mydbmodels import *
 
 # jinja2 initialization
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+jinja_env = jinja2.Environment(autoescape=False, loader = jinja2.FileSystemLoader(template_dir))
 _external = True
 
 
@@ -330,8 +330,8 @@ class NewPostHandler(Handler):
                      username = self.user.username,
                      like_count = 0)
         b.put()
-        memcache.delete('top')
-        self.redirect('../')
+        memcache.set('top', None)
+        self.redirect('/blog/%s' % b.key().id())
         
 ## New Blog Page Handler
 # Handles requests for the '/blog/newpost' url
@@ -352,27 +352,29 @@ class BlogHandler(Handler):
 
 class BlogPostHandler(Handler):
 
-    @classmethod
     def can_user_like(cls, user, post_id, username):
         return not BlogPostLikes.has_user_liked(post_id, username) and not user.username == username
     
     def get(self, blog_id):
         p = BlogPost.get_by_id(int(blog_id))
+        comments = Comment.get_comments_for_post(blog_id)
         if p:
             myuser = None
             can_like = False
             if self.user:
                 myuser = self.user
-                can_like = BlogPostHandler.can_user_like(myuser, blog_id, myuser.username)
+                can_like = self.can_user_like(myuser, blog_id, myuser.username)
             self.render("blogpost.html",
-                            user = myuser,
-                            can_like = can_like,
-                            blogpost = p)
+                        user = myuser,
+                        can_like = can_like,
+                        blogpost = p,
+                        comments = comments)
         else:
             self.redirect('../')
 
     def post(self, blog_id):
         p = BlogPost.get_by_id(int(blog_id))
+        comments = Comment.get_comments_for_post(blog_id)
 
         # if post is not found, redirect
         if not p:
@@ -386,24 +388,26 @@ class BlogPostHandler(Handler):
                         user = myuser,
                         can_like = False,
                         blogpost = p,
-                        errormsg = "You must be logged in to perform that action")
+                        errormsg = "You must be logged in to perform that action",
+                        comments = comments)
             return
 
         # if has post parameter 'like' then it is a like
         if self.request.get('like') == 'like':
-            can_like = not BlogPostLikes.has_user_liked(blog_id, myuser.username)
             if BlogPostLikes.has_user_liked(blog_id, myuser.username):
                 self.render("blogpost.html",
                             user = myuser,
-                            can_like = can_like,
+                            can_like = False,
                             blogpost = p,
-                            errormsg = "You have already 'liked' this post")
+                            errormsg = "You have already 'liked' this post",
+                            comments = comments)
             elif myuser.username == p.username:
                 self.render("blogpost.html",
                             user = myuser,
-                            can_like = can_like,
+                            can_like = False,
                             blogpost = p,
-                            errormsg = "You can't like your own post")
+                            errormsg = "You can't like your own post",
+                            comments = comments)
             else:
                 new_like = BlogPostLikes(post_key_id = int(blog_id),
                                          username = myuser.username)
@@ -413,9 +417,30 @@ class BlogPostHandler(Handler):
                 self.render("blogpost.html",
                         user = myuser,
                         can_like = False,
-                        blogpost = p)
+                        blogpost = p,
+                        comments = comments)
+        # user is attempting to post a new comment
         else:
-            self.redirect('../')
+            can_like = self.can_user_like(myuser, blog_id, myuser.username)
+            comment = self.request.get('newComment')
+            if(comment):
+                comment_db = Comment(post_key_id = int(blog_id),
+                                     author = myuser.username,
+                                     comment = comment)
+                comment_db.put()
+                comments = [comment_db] + comments
+                self.render("blogpost.html",
+                            user = myuser,
+                            can_like = can_like,
+                            blogpost = p,
+                            comments = comments)
+            else:
+                self.render("blogpost.html",
+                            user = myuser,
+                            can_like = can_like,
+                            blogpost = p,
+                            errormsg = "You must enter a comment",
+                            comments = comments)
         
 
         

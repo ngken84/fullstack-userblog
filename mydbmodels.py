@@ -110,3 +110,21 @@ class BlogPostLikes(db.Model):
         return len(likes) > 0
         
         
+## Comment Model
+class Comment(db.Model):
+    post_key_id = db.IntegerProperty()
+    author = db.StringProperty(required = True)
+    comment = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+
+    @classmethod
+    def get_comments_for_post(cls, post_id):
+        comm = db.GqlQuery("SELECT * FROM Comment "
+                           "WHERE post_key_id = %s "
+                           "ORDER BY created DESC " % post_id)
+        comm = list(comm)
+        return comm
+
+    
+    
+    

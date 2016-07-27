@@ -57,8 +57,14 @@
 		</div>
 	</form>
 {% endif %}
-{% if comments and len(comments) > 0 %}
-
+{% if comments and comments|length > 0 %}
+	{% for comment in comments %}
+		<div class="row">
+			<div class="col-sm-12">
+				<p>{{comment.comment}}</p>
+			</div>
+		</div>
+	{% endfor %}
 {% else %}
 	<div class="row">
 		<div class="col-sm-12">
