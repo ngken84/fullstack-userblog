@@ -7373,6 +7373,17 @@ button.close {
 	background: transparent;
 	font-family: inherit;
 }
+
+.user-icon {
+	display: inline-block;
+	border: 1px solid grey;
+	font-size: 20px;
+	border-radius: 7px;
+	padding: 0px 4px;
+	margin-right: 6px;
+	color: whitesmoke;
+	background-color: darkgrey;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**
