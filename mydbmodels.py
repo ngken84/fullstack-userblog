@@ -125,6 +125,9 @@ class Comment(db.Model):
         comm = list(comm)
         return comm
 
+    def formatted_date(self):
+        return self.created.strftime('%b %d, %Y')
+
     
     
     

@@ -338,12 +338,25 @@ class NewPostHandler(Handler):
 
 class BlogHandler(Handler):
     def get(self):
-        if(not self.user):
+        user_id = self.request.get('user')
+        my_user = self.user
+        p = None
+        other_user = None
+
+        if user_id:
+            other_user = User.by_name(user_id)
+            if other_user:
+                p = BlogPost.latest_by_name(user_id) 
+        elif my_user:
+            p = BlogPost.latest_by_name(self.user.username) 
+            
+        if not my_user and other_user is None:
             self.redirect('../signin')
             return
-        p = BlogPost.latest_by_name(self.user.username)
+
         self.render("blog.html",
-                    user = self.user,
+                    user = my_user,
+                    other_user = user_id,
                     posts = p)
 
 

@@ -61,7 +61,7 @@
 	{% for comment in comments %}
 		<div class="row">
 			<div class="col-sm-12">
-				<span class="user-icon">🌹</span> {{comment.author}} <span class="date-text">{{comment.created}}
+				<span class="user-icon">🌹</span> <a href="/blog?user={{comment.author}}">{{comment.author}}</a> - <span class="date-text">{{comment.formatted_date()}}
 			</div>
 			<div class="col-sm-12">
 				<p>{{comment.comment}}</p>
