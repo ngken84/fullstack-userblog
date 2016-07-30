@@ -333,8 +333,8 @@ class NewPostHandler(Handler):
         memcache.set('top', None)
         self.redirect('/blog/%s' % b.key().id())
         
-## New Blog Page Handler
-# Handles requests for the '/blog/newpost' url
+## Blog Handler
+# Handles requests for the '/blog' url
 
 class BlogHandler(Handler):
     def get(self):
