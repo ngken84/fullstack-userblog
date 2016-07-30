@@ -2,6 +2,17 @@
 
 {% block content %}
 
+{% if user and not other_user%}
+	<div class="row">
+		<div class="col-sm-12">
+			<form action="/blog/newpost">
+				<button type="sumbit" class="btn btn-primary btn-lg btn-block">+ Blog Post</button>
+			</form>
+		</div>
+	</div>
+{% endif %}
+
+
 <div class="row">
 	{% for blogpost in posts %}
 		<div class="col-sm-12">
@@ -10,5 +21,4 @@
 		</div>
 	{% endfor %}
 </div>
-
 {% endblock %}
