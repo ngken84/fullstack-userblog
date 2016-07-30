@@ -96,6 +96,9 @@ class BlogPost(db.Model):
             memcache.set('top', posts)
         return posts
 
+    def formatted_date(self):
+        return self.created.strftime('%b %d, %Y')
+
 ## Blog Post Likes Model
 class BlogPostLikes(db.Model):
     post_key_id = db.IntegerProperty()

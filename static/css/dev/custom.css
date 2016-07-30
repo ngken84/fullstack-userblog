@@ -37,3 +37,7 @@
 	color: whitesmoke;
 	background-color: darkgrey;
 }
+
+.comment-author {
+	margin-bottom: 2px;
+}
