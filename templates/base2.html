@@ -1,41 +1,11 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<link rel="stylesheet" href="../stylesheets/production.css">
-		<script src="../js/production.min.js"></script>
-		<meta http-equive="Content-Type" content="text/html; charset=utf-8">
-	</head>
-	<body>
-		<div class="container-fluid" style="margin: 0">
-			<div class="container">
-				<div class="row">
-					<div class="col-md-6">
-						<h2>❇ Full Stack Blog Project ❇</h2>
-					</div>
+{% extends "parentbase.html" %}
 
-					<div class="col-md-6">
-						<div class="text-right">
-							<ul class="list-inline">
-								{% if not user %}
-									<li><a href="/signin">Sign In</a></li>
-									<li><a href="/newaccount">Create Account</a></li>
-								{% else %}
-									<li>Hi, {{user.username}}</li>
-									<li><a href="/blog">My Blog</a></li>
-									<li><a href="/logout">Log Out</a></li>
-								{% endif %}
-							</ul>
-						</div>
-					</div>
+{% block head %}
+	<link rel="stylesheet" href="../stylesheets/production.css">
+	<script src="../js/production.min.js"></script>
+{% endblock %}
 
-				</div>
-			</div>
-		</div>
-
-		<div class="container">
-			{% block content %}
-			{% endblock %}
-		</div>
-
-	</body>
-</html>
+{% block body %}
+	{% block content %}
+	{% endblock %}
+{% endblock %}

@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% block head2 %}
+	{% if other_user %}
+		<title>{{other_user}}'s Blog</title>
+	{% else %}
+		<title>My Blog</title>
+	{% endif %}
+{% endblock %}
+
 {% block content %}
 
 {% if user and not other_user%}
