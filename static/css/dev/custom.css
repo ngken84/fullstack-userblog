@@ -51,7 +51,12 @@
 	margin-bottom: 0.2em;
 }
 
-.my-nav-bar {
+.page-header {
 	margin: 0 0 2.4em 0;
 	background-color: #400416;
 }
+
+.my-nav-bar, .my-nav-bar a {
+	color: #CED2B6;
+}
+
