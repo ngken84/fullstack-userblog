@@ -36,6 +36,7 @@
 	{% for blogpost in posts %}
 		<div class="col-sm-12">
 			<a href="/blog/{{blogpost.key().id()}}"><h3>{{blogpost.subject}}</h3></a>
+			<p><i>Posted {{blogpost.formatted_date()}}</i></p>
 			<p>{{blogpost.blog}}</p>
 		</div>
 	{% endfor %}

@@ -10,6 +10,10 @@
 <div class="row">
 	<div class="col-sm-12">
 		<h3>{{blogpost.subject}}</h3>
+		{% if user and user.username != blogpost.username %}
+			<p class="comment-author">By <a href="/blog?user={{blogpost.username}}">{{blogpost.username}}</a></p>
+		{% endif %}
+		<p><i>Posted {{blogpost.formatted_date()}}</i></p>
 		<p>{{blogpost.blog}}</p>
 	</div>
 </div>
