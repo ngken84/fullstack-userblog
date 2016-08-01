@@ -5,14 +5,15 @@
 		{% endblock %}
 		{% block head2 %}
 		{% endblock %}
+		<link href='https://fonts.googleapis.com/css?family=Economica:400,700' rel='stylesheet' type='text/css'>
 		<meta http-equive="Content-Type" content="text/html; charset=utf-8">
 	</head>
 	<body>
-		<div class="container-fluid" style="margin: 0">
+		<div class="container-fluid my-nav-bar">
 			<div class="container">
 				<div class="row">
 					<div class="col-md-6">
-						<h2>❇ Full Stack Blog Project ❇</h2>
+						<h2><a class="site-header" href="{% block header_link %}{% endblock%}">❇ Full Stack Blog Project ❇</a></h2>
 					</div>
 
 					<div class="col-md-6">

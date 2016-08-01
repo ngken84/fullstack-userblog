@@ -7388,6 +7388,20 @@ button.close {
 .comment-author {
 	margin-bottom: 2px;
 }
+
+.site-header, .site-header:hover {
+	display: inline-block;
+	font-family: 'Economica', sans-serif;
+	font-size: 1.5em;
+	text-decoration: none;
+	color: #CED2B6;
+	margin-bottom: 0.2em;
+}
+
+.my-nav-bar {
+	margin: 0 0 2.4em 0;
+	background-color: #400416;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**
