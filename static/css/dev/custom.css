@@ -42,10 +42,10 @@
 	margin-bottom: 2px;
 }
 
-.site-header, .site-header:hover {
+.site-header, .site-header:hover, .site-header:visited, .site-header:active {
 	display: inline-block;
 	font-family: 'Economica', sans-serif;
-	font-size: 1.5em;
+	font-size: 1.1em;
 	text-decoration: none;
 	color: #CED2B6;
 	margin-bottom: 0.2em;
