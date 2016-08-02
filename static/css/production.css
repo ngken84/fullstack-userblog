@@ -7411,6 +7411,25 @@ button.close {
 .my-nav-bar, .my-nav-bar a {
 	color: #CED2B6;
 }
+
+.right-menu {
+	background-color: #eff1e1;
+	color: #400416;
+	border-radius: 20px;
+	padding-bottom:10em;
+}
+
+.credit-link {
+	position:fixed;
+	bottom:10px;
+	right:10px;
+	font-size: 0.5em;
+}
+
+body {
+	background-image: url('../img/background.jpg');
+	background-size: cover;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**
