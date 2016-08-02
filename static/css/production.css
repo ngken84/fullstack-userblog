@@ -7413,7 +7413,7 @@ button.close {
 }
 
 .right-menu {
-	background-color: #eff1e1;
+	background-color: rgba(239,241,225,.5);
 	color: #400416;
 	border-radius: 20px;
 	padding-bottom:10em;
