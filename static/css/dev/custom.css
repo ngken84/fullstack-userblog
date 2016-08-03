@@ -83,3 +83,9 @@ body {
 	background-image: url('../img/background.jpg');
 	background-size: cover;
 }
+
+.transparent-back {
+	padding-bottom: 20em;
+	background-color: rgba(255,255,255,.8);
+	border-radius: 0px 0px 25px 25px;
+}
