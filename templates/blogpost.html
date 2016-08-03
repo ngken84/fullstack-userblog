@@ -19,26 +19,32 @@
 	</div>
 	<div class="row">
 		<div class="col-sm-12 text-right">
-			{% if can_like %}
-				<form method="post">
-					<input type="hidden" value="like" name="like">
-					<button class="no-style-button">
-						<span class="like-style">♥</span>
-						{% if not blogpost.like_count %}
-							0
-						{% else %}
-							{{blogpost.like_count}}
-						{% endif %}
-					</button>
-				</form>
-			{% else %}
-				<span class="like-style">♥</span>
-				{% if not blogpost.like_count %}
-					0
+			<ul class="list-inline">
+				{% if can_like %}
+				<li>
+					<form method="post">
+						<input type="hidden" value="like" name="like">
+						<button class="no-style-button">
+							<span class="like-style">♥</span>
+							{% if not blogpost.like_count %}
+								0
+							{% else %}
+								{{blogpost.like_count}}
+							{% endif %}
+						</button>
+					</form>
+				</li>
 				{% else %}
-					{{blogpost.like_count}}
+				<li>
+					<span class="like-style">♥</span>
+					{% if not blogpost.like_count %}
+						0
+					{% else %}
+						{{blogpost.like_count}}
+					{% endif %}
+				</li>
 				{% endif %}
-			{% endif %}
+			</ul>
 		</div>
 	</div>
 	{% if errormsg %}
