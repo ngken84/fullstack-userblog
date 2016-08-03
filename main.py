@@ -366,7 +366,7 @@ class BlogHandler(Handler):
 class BlogPostHandler(Handler):
 
     def can_user_like(cls, user, post_id, username):
-        return not BlogPostLikes.has_user_liked(post_id, username) and not user.username == username
+        return not BlogPostLikes.has_user_liked(post_id, user.username) and not user.username == username
     
     def get(self, blog_id):
         p = BlogPost.get_by_id(int(blog_id))
