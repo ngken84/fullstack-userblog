@@ -5,16 +5,16 @@
 {% endblock %}
 
 {% block content %}
-
-<div class="row">
-	{% for blogpost in posts %}
-		<div class="col-sm-4">
-			<a href="/blog/{{blogpost.key().id()}}"><h3>{{blogpost.subject}}</h3></a>
-			<p class="comment-author">By <a href="/blog?user={{blogpost.username}}">{{blogpost.username}}</a></p>
-			<p><i>Posted {{blogpost.formatted_date()}}</i></p>
-			<p>{{blogpost.blog}}</p>
-		</div>
-	{% endfor %}
+<div class="container page-body">
+	<div class="row">
+		{% for blogpost in posts %}
+			<div class="col-sm-4">
+				<a href="/blog/{{blogpost.key().id()}}"><h3>{{blogpost.subject}}</h3></a>
+				<p class="comment-author">By <a href="/blog?user={{blogpost.username}}">{{blogpost.username}}</a></p>
+				<p><i>Posted {{blogpost.formatted_date()}}</i></p>
+				<p>{{blogpost.blog}}</p>
+			</div>
+		{% endfor %}
+	</div>
 </div>
-
 {% endblock %}

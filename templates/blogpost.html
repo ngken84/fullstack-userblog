@@ -6,83 +6,83 @@
 
 
 {% block content %}
-
-<div class="row">
-	<div class="col-sm-12">
-		<h3>{{blogpost.subject}}</h3>
-		{% if user and user.username != blogpost.username %}
-			<p class="comment-author">By <a href="/blog?user={{blogpost.username}}">{{blogpost.username}}</a></p>
-		{% endif %}
-		<p><i>Posted {{blogpost.formatted_date()}}</i></p>
-		<p>{{blogpost.blog}}</p>
-	</div>
-</div>
-<div class="row">
-	<div class="col-sm-12 text-right">
-		{% if can_like %}
-			<form method="post">
-				<input type="hidden" value="like" name="like">
-				<button class="no-style-button">
-					<span class="like-style">♥</span>
-					{% if not blogpost.like_count %}
-						0
-					{% else %}
-						{{blogpost.like_count}}
-					{% endif %}
-				</button>
-			</form>
-		{% else %}
-			<span class="like-style">♥</span>
-			{% if not blogpost.like_count %}
-				0
-			{% else %}
-				{{blogpost.like_count}}
-			{% endif %}
-		{% endif %}
-	</div>
-</div>
-{% if errormsg %}
-	<div class="row">
-		<div class="col-sm-12 text-center">
-			{{errormsg}}
-		</div>
-	</div>
-{% endif %}
-<div class="row">
-	<div class="col-sm-12">
-		<h4>Comments</h4>
-	</div>
-</div>
-{% if user %}
-	<form method="post">
-		<div class="form-group">
-			<label for="newComment">New Comment</label>
-			<textarea class="form-control" rows="3" name="newComment"></textarea>
-		</div>
-		<div class="form-group">
-			<div class="col-sm-12 text-right">
-				<button type="submit" class="btn btn-default">Post Comment</button>
-			</div>
-		</div>
-	</form>
-{% endif %}
-{% if comments and comments|length > 0 %}
-	{% for comment in comments %}
-		<div class="row">
-			<div class="col-sm-12">
-				<span class="user-icon">🌹</span> <a href="/blog?user={{comment.author}}">{{comment.author}}</a> - <span class="date-text">{{comment.formatted_date()}}
-			</div>
-			<div class="col-sm-12">
-				<p>{{comment.comment}}</p>
-			</div>
-		</div>
-	{% endfor %}
-{% else %}
+<div class="container page-body">
 	<div class="row">
 		<div class="col-sm-12">
-			No comments...
+			<h3>{{blogpost.subject}}</h3>
+			{% if user and user.username != blogpost.username %}
+				<p class="comment-author">By <a href="/blog?user={{blogpost.username}}">{{blogpost.username}}</a></p>
+			{% endif %}
+			<p><i>Posted {{blogpost.formatted_date()}}</i></p>
+			<p>{{blogpost.blog}}</p>
 		</div>
 	</div>
-{% endif %}
-
+	<div class="row">
+		<div class="col-sm-12 text-right">
+			{% if can_like %}
+				<form method="post">
+					<input type="hidden" value="like" name="like">
+					<button class="no-style-button">
+						<span class="like-style">♥</span>
+						{% if not blogpost.like_count %}
+							0
+						{% else %}
+							{{blogpost.like_count}}
+						{% endif %}
+					</button>
+				</form>
+			{% else %}
+				<span class="like-style">♥</span>
+				{% if not blogpost.like_count %}
+					0
+				{% else %}
+					{{blogpost.like_count}}
+				{% endif %}
+			{% endif %}
+		</div>
+	</div>
+	{% if errormsg %}
+		<div class="row">
+			<div class="col-sm-12 text-center">
+				{{errormsg}}
+			</div>
+		</div>
+	{% endif %}
+	<div class="row">
+		<div class="col-sm-12">
+			<h4>Comments</h4>
+		</div>
+	</div>
+	{% if user %}
+		<form method="post">
+			<div class="form-group">
+				<label for="newComment">New Comment</label>
+				<textarea class="form-control" rows="3" name="newComment"></textarea>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-12 text-right">
+					<button type="submit" class="btn btn-default">Post Comment</button>
+				</div>
+			</div>
+		</form>
+	{% endif %}
+	{% if comments and comments|length > 0 %}
+		{% for comment in comments %}
+			<div class="row">
+				<div class="col-sm-12">
+					<span class="user-icon">🌹</span> <a href="/blog?user={{comment.author}}">{{comment.author}}</a> - <span class="date-text">{{comment.formatted_date()}}
+				</div>
+				<div class="col-sm-12">
+					<p>{{comment.comment}}</p>
+				</div>
+			</div>
+		{% endfor %}
+	{% else %}
+		<div class="row">
+			<div class="col-sm-12">
+				No comments...
+			</div>
+		</div>
+	{% endif %}
+</div>
 {% endblock %}

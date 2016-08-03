@@ -5,45 +5,46 @@
 {% endblock %}
 
 {% block content %}
+<div class="container page-body">
+	<div class="row">
+		<div class="col-sm-3">
 
-<div class="row">
-	<div class="col-sm-3">
+		</div>
+		<div class="col-sm-9">
+			<br><br>
+			<div class="col-sm-12">
+				<h3>Create New Post</h3>
+				<br>
+			</div>
 
-	</div>
-	<div class="col-sm-9">
-		<br><br>
-		<div class="col-sm-12">
-			<h3>Create New Post</h3>
-			<br>
+			<form method="post">
+				<div class="form-group">
+					<label for="subject">Subject</label>
+					<input class="form-control" id="subject" name="subject" placeholder="Subject" value="{{subject}}">
+				</div>
+				{% if subject_error %}
+					<div class="row">
+						<div class="col-sm-12 form-error">
+							{{subject_error}}
+						</div>
+					</div>
+				{% endif %}
+				<div class="form-group">
+					<label for="blog-text">Blog Post</label>
+					<textarea class="form-control" rows="12" name="blog-text">{{body__text}}</textarea>
+				</div>
+				{% if body_error %}
+					<div class="row">
+						<div class="col-sm-12 form-error">
+							{{body_error}}
+						</div>
+					</div>
+				{% endif %}
+				<button type="submit" class="btn btn-default">Submit</button>
+			</form>
 		</div>
 
-		<form method="post">
-			<div class="form-group">
-				<label for="subject">Subject</label>
-				<input class="form-control" id="subject" name="subject" placeholder="Subject" value="{{subject}}">
-			</div>
-			{% if subject_error %}
-				<div class="row">
-					<div class="col-sm-12 form-error">
-						{{subject_error}}
-					</div>
-				</div>
-			{% endif %}
-			<div class="form-group">
-				<label for="blog-text">Blog Post</label>
-				<textarea class="form-control" rows="12" name="blog-text">{{body__text}}</textarea>
-			</div>
-			{% if body_error %}
-				<div class="row">
-					<div class="col-sm-12 form-error">
-						{{body_error}}
-					</div>
-				</div>
-			{% endif %}
-			<button type="submit" class="btn btn-default">Submit</button>
-		</form>
 	</div>
-
 </div>
 
 
