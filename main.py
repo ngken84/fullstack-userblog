@@ -376,7 +376,7 @@ class BlogPostHandler(Handler):
             can_like = False
             if self.user:
                 myuser = self.user
-                can_like = self.can_user_like(myuser, blog_id, myuser.username)
+                can_like = self.can_user_like(myuser, blog_id, p.username)
             self.render("blogpost.html",
                         user = myuser,
                         can_like = can_like,
