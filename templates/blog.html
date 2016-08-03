@@ -10,10 +10,9 @@
 
 {% block content %}
 <div class="container page-body transparent-back">
-{% if user and not other_user%}
 
+	{% if user and not other_user%}
 		<div class="row">
-
 			<div class="col-sm-10 col-sm-offset-1">
 				<form action="/blog/newpost">
 					<button type="sumbit" class="btn btn-primary btn-lg btn-block">+ Blog Post</button>
@@ -23,24 +22,24 @@
 				<h1>My Blog</h1>
 			</div>
 		</div>
-	</div>
-{% elif other_user %}
+
+	{% elif other_user %}
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>{{other_user}}'s Blog</h1>
+			</div>
+		</div>
+	{% endif %}
+
 	<div class="row">
-		<div class="col-sm-12">
-			<h1>{{other_user}}'s Blog</h1>
-		</div>
+		{% for blogpost in posts %}
+			<div class="col-sm-12">
+				<a href="/blog/{{blogpost.key().id()}}"><h3>{{blogpost.subject}}</h3></a>
+				<p><i>Posted {{blogpost.formatted_date()}}</i></p>
+				<p>{{blogpost.blog}}</p>
+			</div>
+		{% endfor %}
 	</div>
 
-{% endif %}
-
-
-<div class="row">
-	{% for blogpost in posts %}
-		<div class="col-sm-12">
-			<a href="/blog/{{blogpost.key().id()}}"><h3>{{blogpost.subject}}</h3></a>
-			<p><i>Posted {{blogpost.formatted_date()}}</i></p>
-			<p>{{blogpost.blog}}</p>
-		</div>
-	{% endfor %}
 </div>
 {% endblock %}
