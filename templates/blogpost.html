@@ -20,29 +20,37 @@
 	<div class="row">
 		<div class="col-sm-12 text-right">
 			<ul class="list-inline">
+				{% if user and user.username == blogpost.username %}
+					<li>
+						<a href="/editpost/{{blogpost.key().id()}}">
+							<img class="img-responsive img-icon" src="/img/edit.png">
+						</a>
+					</li>
+				{% endif %}
+
 				{% if can_like %}
-				<li>
-					<form method="post">
-						<input type="hidden" value="like" name="like">
-						<button class="no-style-button">
-							<span class="like-style">♥</span>
-							{% if not blogpost.like_count %}
-								0
-							{% else %}
-								{{blogpost.like_count}}
-							{% endif %}
-						</button>
-					</form>
-				</li>
+					<li>
+						<form method="post">
+							<input type="hidden" value="like" name="like">
+							<button class="no-style-button">
+								<span class="like-style">♥</span>
+								{% if not blogpost.like_count %}
+									0
+								{% else %}
+									{{blogpost.like_count}}
+								{% endif %}
+							</button>
+						</form>
+					</li>
 				{% else %}
-				<li>
-					<span class="like-style">♥</span>
-					{% if not blogpost.like_count %}
-						0
-					{% else %}
-						{{blogpost.like_count}}
-					{% endif %}
-				</li>
+					<li>
+						<span class="like-style">♥</span>
+						{% if not blogpost.like_count %}
+							0
+						{% else %}
+							{{blogpost.like_count}}
+						{% endif %}
+					</li>
 				{% endif %}
 			</ul>
 		</div>

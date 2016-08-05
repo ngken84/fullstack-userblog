@@ -7437,6 +7437,12 @@ body {
 	background-color: rgba(255,255,255,.8);
 	border-radius: 0px 0px 25px 25px;
 }
+
+.img-icon {
+	padding-top: 5px;
+	width: 23px;
+	height: 23px;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**
