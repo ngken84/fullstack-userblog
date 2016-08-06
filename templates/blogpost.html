@@ -21,7 +21,7 @@
 		<div class="col-sm-12 text-right">
 			<ul class="list-inline">
 				{% if user and user.username == blogpost.username %}
-					<li>
+					<li style="vertical-align: bottom;">
 						<a href="/editpost/{{blogpost.key().id()}}">
 							<img class="img-responsive img-icon" src="/img/edit.png">
 						</a>
