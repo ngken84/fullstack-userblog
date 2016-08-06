@@ -360,7 +360,7 @@ class BlogHandler(Handler):
                     posts = p)
 
 
-## New Blog Page Handler
+## Blog Page Handler
 # Handles requests for the '/blog/(\d+)/?' url
 
 class BlogPostHandler(Handler):
@@ -456,7 +456,52 @@ class BlogPostHandler(Handler):
                             comments = comments)
         
 
+## Edit Blog Page Handler
+# Handles requests for the '/blog/(\d+)/?' url
+
+class EditPostHandler(Handler):
+
+    def get(self, blog_id):
+        if(not self.user):
+            self.redirect('../signin')
+            return
+        p = BlogPost.get_by_id(int(blog_id))
+        comments = Comment.get_comments_for_post(blog_id)
         
+        self.render("editpost.html",
+                    user = self.user,
+                    blogpost = p,
+                    comments = comments)
+
+    def post(self, blog_id):
+        if(not self.user):
+            self.redirect('../signin')
+            return
+        p = BlogPost.get_by_id(int(blog_id))
+        if self.user.username != p.username:
+            comments = Comment.get_comments_for_post(blog_id)
+            self.render("editpost.html",
+                        user = self.user,
+                        blogpost = p,
+                        comments = comments,
+                        error_msg = 'You are not the owner of this post.')
+            return
+        edits = self.request.get('blog')
+        if edits:
+            p.blog = edits
+            p.put()
+            BlogPost.flush_cache()
+            self.redirect('../blog/%s' % p.key().id())
+        else:
+            comments = Comment.get_comments_for_post(blog_id)
+            self.render("editpost.html",
+                        user = self.user,
+                        blogpost = p,
+                        comments = comments,
+                        errormsg = 'Please enter some text.')
+                        
+            
+            
             
                         
 
@@ -468,5 +513,6 @@ app = webapp2.WSGIApplication([
     ('/logout', LogoutHandler),
     ('/blog/newpost', NewPostHandler),
     ('/blog/?', BlogHandler),
-    ('/blog/(\d+)/?', BlogPostHandler)
+    ('/blog/(\d+)/?', BlogPostHandler),
+    ('/editpost/(\d+)/?', EditPostHandler)
 ], debug=True)

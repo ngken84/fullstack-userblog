@@ -1,0 +1,72 @@
+{% extends "base2.html" %}
+
+{% block head2 %}
+	<title>Full Stack Blog Project : Edit {{blogpost.subject}}</title>
+{% endblock %}
+
+
+{% block content %}
+<div class="container page-body transparent-back">
+	<div class="row">
+		<div class="col-sm-12">
+			<h3>{{blogpost.subject}}</h3>
+			<p><i>Posted {{blogpost.formatted_date()}}</i></p>
+		</div>
+	</div>
+	<form method="post">
+		<div class="form-group">
+			<textarea class="form-control" rows="3" name="blog">{{blogpost.blog}}</textarea>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-12 text-center">
+				<button type="submit" class="btn btn-default">Submit Changes</button>
+			</div>
+		</div>
+	</form>
+	{% if errormsg %}
+		<div class="row">
+			<div class="col-sm-12 text-center">
+				{{errormsg}}
+			</div>
+		</div>
+	{% endif %}
+	<div class="row">
+		<div class="col-sm-12 text-right">
+			<ul class="list-inline">
+				<li>
+					<span class="like-style">♥</span>
+					{% if not blogpost.like_count %}
+						0
+					{% else %}
+						{{blogpost.like_count}}
+					{% endif %}
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<h4>Comments</h4>
+		</div>
+	</div>
+	{% if comments and comments|length > 0 %}
+		{% for comment in comments %}
+			<div class="row">
+				<div class="col-sm-12">
+					<span class="user-icon">🌹</span> <a href="/blog?user={{comment.author}}">{{comment.author}}</a> - <span class="date-text">{{comment.formatted_date()}}
+				</div>
+				<div class="col-sm-12">
+					<p>{{comment.comment}}</p>
+				</div>
+			</div>
+		{% endfor %}
+	{% else %}
+		<div class="row">
+			<div class="col-sm-12">
+				No comments...
+			</div>
+		</div>
+	{% endif %}
+</div>
+{% endblock %}
