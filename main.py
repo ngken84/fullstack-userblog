@@ -432,11 +432,25 @@ class BlogPostHandler(Handler):
                         can_like = False,
                         blogpost = p,
                         comments = comments)
+        elif self.request.get('delete') == 'delete':
+            if myuser and myuser.username == p.username:
+                p.delete()
+                time.sleep(1)
+                BlogPost.flush_cache()
+                self.redirect('/blog')
+            else:
+                can_like = self.can_user_like(myuser, blog_id, myuser.username)
+                self.render("blogpost.html",
+                            user = myuser,
+                            can_like = can_like,
+                            blogpost = p,
+                            errormsg = "You can't delete this post.",
+                            comments = comments)
         # user is attempting to post a new comment
         else:
             can_like = self.can_user_like(myuser, blog_id, myuser.username)
             comment = self.request.get('newComment')
-            if(comment):
+            if comment:
                 comment_db = Comment(post_key_id = int(blog_id),
                                      author = myuser.username,
                                      comment = comment)

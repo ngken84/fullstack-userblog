@@ -26,6 +26,14 @@
 							<img class="img-responsive img-icon" src="/img/edit.png">
 						</a>
 					</li>
+					<li>
+						<form method="post">
+							<input type="hidden" value="delete" name="delete">
+							<button class="no-style-button" style="vertical-align: bottom;" onclick="return confirm('Are you sure you want to remove this post?')">
+								<img class="img-responsive img-icon" src="/img/delete.png">
+							</button>
+						</form>
+					</li>
 				{% endif %}
 
 				{% if can_like %}
