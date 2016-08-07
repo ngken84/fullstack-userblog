@@ -7442,6 +7442,10 @@ body {
 	width: 23px;
 	height: 23px;
 }
+
+.comment {
+	padding: 12px;
+}
 /*! normalize.css v4.1.1 | MIT License | github.com/necolas/normalize.css */
 
 /**
