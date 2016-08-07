@@ -90,14 +90,36 @@
 	{% endif %}
 	{% if comments and comments|length > 0 %}
 		{% for comment in comments %}
-			<div class="row">
-				<div class="col-sm-12">
-					<span class="user-icon">🌹</span> <a href="/blog?user={{comment.author}}">{{comment.author}}</a> - <span class="date-text">{{comment.formatted_date()}}
+				<div class="row">
+					<div class="col-sm-12">
+						<span class="user-icon">🌹</span> <a href="/blog?user={{comment.author}}">{{comment.author}}</a> - <span class="date-text">{{comment.formatted_date()}}
+					</div>
+					<div class="col-sm-12">
+						<p>{{comment.comment}}</p>
+					</div>
 				</div>
-				<div class="col-sm-12">
-					<p>{{comment.comment}}</p>
+			{% if user and user.username == comment.author %}
+				<div class="row">
+					<div class="col-sm-12 text-right">
+						<ul class="list-inline">
+							<li style="vertical-align: bottom;">
+								<a href="/editcomment/{{comment.key().id()}}"/>
+									<img class="img-responsive img-icon" src="/img/edit.png">
+								</a>
+							</li>
+							<li>
+								<form method="post">
+									<input type="hidden" value="deletecomment" name="delete">
+									<input type="hidden" name="comment" value="{{comment.key().id()}}">
+									<button class="no-style-button" style="vertical-align: bottom;" onclick="return confirm('Are you sure you want to remove this post?')">
+										<img class="img-responsive img-icon" src="/img/delete.png">
+									</button>
+								</form>
+							</li>
+						</ul>
+					</div>
 				</div>
-			</div>
+			{% endif %}
 		{% endfor %}
 	{% else %}
 		<div class="row">
