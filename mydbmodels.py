@@ -132,6 +132,11 @@ class Comment(db.Model):
         comm = list(comm)
         return comm
 
+    @classmethod
+    def by_id(cls, cid):
+        return db.GqlQuery("SELECT * FROM Comment WHERE __key__ = KEY"
+                           "(\'Comment\', %s)" % int(cid)).get()
+
     def formatted_date(self):
         return self.created.strftime('%b %d, %Y')
 

@@ -432,6 +432,8 @@ class BlogPostHandler(Handler):
                         can_like = False,
                         blogpost = p,
                         comments = comments)
+
+        # if has post parameter 'delete' then delete the post
         elif self.request.get('delete') == 'delete':
             if myuser and myuser.username == p.username:
                 p.delete()
@@ -446,6 +448,33 @@ class BlogPostHandler(Handler):
                             blogpost = p,
                             errormsg = "You can't delete this post.",
                             comments = comments)
+        # if has post parameter 'deletecomment' then delete the comment
+        elif self.request.get('deletecomment') == 'delete':
+            cid = self.request.get('comment')
+            if myuser == None:
+                self.render("blogpost.html",
+                            user = myuser,
+                            can_like = False,
+                            blogpost = p,
+                            errormsg = "You must be logged in to delete a comment",
+                            comments = comments)
+                return
+            elif cid:
+                markedcomm = Comment.by_id(cid)
+                if markedcomm and markedcomm.author == myuser.username:
+                    markedcomm.delete()
+                    time.sleep(1)
+                    self.redirect('/blog/%s' % p.key().id())
+                    return
+                else:
+                    can_like = self.can_user_like(myuser, blog_id, myuser.username)
+                    self.render("blogpost.html",
+                                user = myuser,
+                                can_like = can_like,
+                                blogpost = p,
+                                errormsg = "You do not have permission to delete this post",
+                                comments = comments)
+                    return
         # user is attempting to post a new comment
         else:
             can_like = self.can_user_like(myuser, blog_id, myuser.username)
