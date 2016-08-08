@@ -500,7 +500,7 @@ class BlogPostHandler(Handler):
         
 
 ## Edit Blog Page Handler
-# Handles requests for the '/blog/(\d+)/?' url
+# Handles requests for the '/editblog/(\d+)/?' url
 
 class EditPostHandler(Handler):
 
@@ -543,9 +543,57 @@ class EditPostHandler(Handler):
                         comments = comments,
                         errormsg = 'Please enter some text.')
                         
-            
-            
-            
+## Edit Comment Page Handler
+# Handles requests for the '/editcomment/(\d+)/?' url
+
+class EditCommentHandler(Handler):
+
+    def get(self, comment_id):
+        if(not self.user):
+            self.redirect('../signin')
+            return
+        comment = Comment.by_id(comment_id)
+        if not comment:
+            self.redirect('../blog')
+            return
+        p = BlogPost.get_by_id(comment.post_key_id)
+        if not p:
+            self.redirect('../blog')
+            return
+        self.render("editcomment.html",
+                    user = self.user,
+                    blogpost = p,
+                    comment = comment)
+
+    def post(self, comment_id):
+        if(not self.user):
+            self.redirect('../signin')
+            return
+        comment = Comment.by_id(comment_id)
+        if not comment:
+            self.redirect('../blog')
+            return
+        if comment.author != self.user.username:
+            p = BlogPost.get_by_id(comment.post_key_id)
+            self.render("editcomment.html",
+                        user = self.user,
+                        blogpost = p,
+                        comment = comment,
+                        errormsg = "You can't edit another user's comment")
+            return     
+        newcomment = self.request.get('comment')
+        if not newcomment:
+            p = BlogPost.get_by_id(comment.post_key_id)
+            self.render("editcomment.html",
+                        user = self.user,
+                        blogpost = p,
+                        comment = comment,
+                        errormsg = "Please enter some text")
+            return
+        comment.comment = newcomment
+        comment.put()
+        time.sleep(1)
+        self.redirect('../blog/%s' % comment.post_key_id)
                         
 
 app = webapp2.WSGIApplication([
@@ -557,5 +605,6 @@ app = webapp2.WSGIApplication([
     ('/blog/newpost', NewPostHandler),
     ('/blog/?', BlogHandler),
     ('/blog/(\d+)/?', BlogPostHandler),
-    ('/editpost/(\d+)/?', EditPostHandler)
+    ('/editpost/(\d+)/?', EditPostHandler),
+    ('/editcomment/(\d+)/?', EditCommentHandler)
 ], debug=True)
