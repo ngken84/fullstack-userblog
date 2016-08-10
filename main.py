@@ -183,10 +183,10 @@ class SignUpHandler(Handler):
             return
         # no error messages found, register user and redirect to
         # welcome page
-        u = User.register(user, user_password, mail)
-        u.put()
+        newuser = User.register(user, user_password, mail)
+        newuser.put()
         self.set_secure_cookie('new', 'new')
-        self.login(u)
+        self.login(newuser)
         time.sleep(1)
         self.redirect('/welcome')
 
