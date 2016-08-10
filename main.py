@@ -57,8 +57,8 @@ class Handler(webapp2.RequestHandler):
         template -- name of the template to render
         params -- params to use to render the template
         """
-        t = JINJA_ENV.get_template(template)
-        return t.render(params)
+        temp_t = JINJA_ENV.get_template(template)
+        return temp_t.render(params)
 
     def render(self, template, **kw):
         """Write a HTTP response using template and parameters
@@ -171,9 +171,9 @@ class SignUpHandler(Handler):
         mail = self.request.get('email')
         # get all error messages
         user_error = self.get_username_error(user)
-        pass_error = self.getPassword1Error(user_password, verify)
-        ver_error = self.getPassword2Error(user_password, verify)
-        em_error = self.getEmailError(mail)
+        pass_error = self.get_password1_error(user_password)
+        ver_error = self.get_password2_error(user_password, verify)
+        em_error = self.get_email_error(mail)
         # if error message exists, reloade the sign up page with errors
         if user_error or pass_error or ver_error or em_error:
             self.render('signup.html', username=user,
@@ -222,7 +222,7 @@ class SignUpHandler(Handler):
 
     # returns an error message string if the passed password is invalid
     # returns an empty string if the passed password is valid
-    def getPassword1Error(self, password, verify):
+    def get_password1_error(self, password):
         if password:
             if not self.valid_password(password):
                 return "Please enter a valid password"
@@ -233,7 +233,7 @@ class SignUpHandler(Handler):
     # returns an error message string if the passed password & verify
     # inputs are invalid
     # return an empty string if they are valid
-    def getPassword2Error(self, password, verify):
+    def get_password2_error(self, password, verify):
         if password and verify:
             if verify != password:
                 return "Passwords do not match"
@@ -248,7 +248,7 @@ class SignUpHandler(Handler):
 
     # returns an error message string if the passed email address is invalid
     # returns and empty string if passed email is valid
-    def getEmailError(self, email):
+    def get_email_error(self, email):
         if email:
             if not self.valid_email(email):
                 return "Please enter a valid email"
@@ -394,15 +394,15 @@ class BlogHandler(Handler):
     def get(self):
         user_id = self.request.get('user')
         my_user = self.user
-        p = None
+        post = None
         other_user = None
 
         if user_id:
             other_user = User.by_name(user_id)
             if other_user:
-                p = BlogPost.latest_by_name(user_id)
+                post = BlogPost.latest_by_name(user_id)
         elif my_user:
-            p = BlogPost.latest_by_name(self.user.username)
+            post = BlogPost.latest_by_name(self.user.username)
 
         if not my_user and other_user is None:
             self.redirect('../signin')
@@ -411,7 +411,7 @@ class BlogHandler(Handler):
         self.render("blog.html",
                     user=my_user,
                     other_user=user_id,
-                    posts=p)
+                    posts=post)
 
 
 ## Blog Page Handler
@@ -424,28 +424,28 @@ class BlogPostHandler(Handler):
                not user.username == username
 
     def get(self, blog_id):
-        p = BlogPost.get_by_id(int(blog_id))
+        post = BlogPost.get_by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
-        if p:
+        if post:
             myuser = None
             can_like = False
             if self.user:
                 myuser = self.user
-                can_like = self.can_user_like(myuser, blog_id, p.username)
+                can_like = self.can_user_like(myuser, blog_id, post.username)
             self.render("blogpost.html",
                         user=myuser,
                         can_like=can_like,
-                        blogpost=p,
+                        blogpost=post,
                         comments=comments)
         else:
             self.redirect('../')
 
     def post(self, blog_id):
-        p = BlogPost.get_by_id(int(blog_id))
+        post = BlogPost.get_by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
 
         # if post is not found, redirect
-        if not p:
+        if not post:
             self.redirect('../')
             return
 
@@ -455,7 +455,7 @@ class BlogPostHandler(Handler):
             self.render("blogpost.html",
                         user=myuser,
                         can_like=False,
-                        blogpost=p,
+                        blogpost=post,
                         errormsg="You must be logged in to perform that action",
                         comments=comments)
             return
@@ -466,32 +466,32 @@ class BlogPostHandler(Handler):
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=False,
-                            blogpost=p,
+                            blogpost=post,
                             errormsg="You have already 'liked' this post",
                             comments=comments)
-            elif myuser.username == p.username:
+            elif myuser.username == post.username:
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=False,
-                            blogpost=p,
+                            blogpost=post,
                             errormsg="You can't like your own post",
                             comments=comments)
             else:
                 new_like = BlogPostLikes(post_key_id=int(blog_id),
                                          username=myuser.username)
                 new_like.put()
-                p.like_count = p.like_count + 1
-                p.put()
+                post.like_count = post.like_count + 1
+                post.put()
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=False,
-                            blogpost=p,
+                            blogpost=post,
                             comments=comments)
 
         # if has post parameter 'delete' then delete the post
         elif self.request.get('delete') == 'delete':
-            if myuser and myuser.username == p.username:
-                p.delete()
+            if myuser and myuser.username == post.username:
+                post.delete()
                 time.sleep(1)
                 BlogPost.flush_cache()
                 self.redirect('/blog')
@@ -500,7 +500,7 @@ class BlogPostHandler(Handler):
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=can_like,
-                            blogpost=p,
+                            blogpost=post,
                             errormsg="You can't delete this post.",
                             comments=comments)
         # if has post parameter 'deletecomment' then delete the comment
@@ -510,7 +510,7 @@ class BlogPostHandler(Handler):
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=False,
-                            blogpost=p,
+                            blogpost=post,
                             errormsg="You must be logged in to delete a comment",
                             comments=comments)
                 return
@@ -519,14 +519,14 @@ class BlogPostHandler(Handler):
                 if markedcomm and markedcomm.author == myuser.username:
                     markedcomm.delete()
                     time.sleep(1)
-                    self.redirect('/blog/%s' % p.key().id())
+                    self.redirect('/blog/%s' % post.key().id())
                     return
                 else:
                     can_like = self.can_user_like(myuser, blog_id, myuser.username)
                     self.render("blogpost.html",
                                 user=myuser,
                                 can_like=can_like,
-                                blogpost=p,
+                                blogpost=post,
                                 errormsg="You do not have permission to delete this post",
                                 comments=comments)
                     return
@@ -543,13 +543,13 @@ class BlogPostHandler(Handler):
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=can_like,
-                            blogpost=p,
+                            blogpost=post,
                             comments=comments)
             else:
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=can_like,
-                            blogpost=p,
+                            blogpost=post,
                             errormsg="You must enter a comment",
                             comments=comments)
 
@@ -563,38 +563,38 @@ class EditPostHandler(Handler):
         if not self.user:
             self.redirect('../signin')
             return
-        p = BlogPost.get_by_id(int(blog_id))
+        post = BlogPost.get_by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
 
         self.render("editpost.html",
                     user=self.user,
-                    blogpost=p,
+                    blogpost=post,
                     comments=comments)
 
     def post(self, blog_id):
         if not self.user:
             self.redirect('../signin')
             return
-        p = BlogPost.get_by_id(int(blog_id))
-        if self.user.username != p.username:
+        post = BlogPost.get_by_id(int(blog_id))
+        if self.user.username != post.username:
             comments = Comment.get_comments_for_post(blog_id)
             self.render("editpost.html",
                         user=self.user,
-                        blogpost=p,
+                        blogpost=post,
                         comments=comments,
                         error_msg='You are not the owner of this post.')
             return
         edits = self.request.get('blog')
         if edits:
-            p.blog = edits
-            p.put()
+            post.blog = edits
+            post.put()
             BlogPost.flush_cache()
-            self.redirect('../blog/%s' % p.key().id())
+            self.redirect('../blog/%s' % post.key().id())
         else:
             comments = Comment.get_comments_for_post(blog_id)
             self.render("editpost.html",
                         user=self.user,
-                        blogpost=p,
+                        blogpost=post,
                         comments=comments,
                         errormsg='Please enter some text.')
 
@@ -611,13 +611,13 @@ class EditCommentHandler(Handler):
         if not comment:
             self.redirect('../blog')
             return
-        p = BlogPost.get_by_id(comment.post_key_id)
-        if not p:
+        post = BlogPost.get_by_id(comment.post_key_id)
+        if not post:
             self.redirect('../blog')
             return
         self.render("editcomment.html",
                     user=self.user,
-                    blogpost=p,
+                    blogpost=post,
                     comment=comment)
 
     def post(self, comment_id):
@@ -629,19 +629,19 @@ class EditCommentHandler(Handler):
             self.redirect('../blog')
             return
         if comment.author != self.user.username:
-            p = BlogPost.get_by_id(comment.post_key_id)
+            post = BlogPost.get_by_id(comment.post_key_id)
             self.render("editcomment.html",
                         user=self.user,
-                        blogpost=p,
+                        blogpost=post,
                         comment=comment,
                         errormsg="You can't edit another user's comment")
             return
         newcomment = self.request.get('comment')
         if not newcomment:
-            p = BlogPost.get_by_id(comment.post_key_id)
+            post = BlogPost.get_by_id(comment.post_key_id)
             self.render("editcomment.html",
                         user=self.user,
-                        blogpost=p,
+                        blogpost=post,
                         comment=comment,
                         errormsg="Please enter some text")
             return
