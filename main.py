@@ -291,11 +291,13 @@ class SignUpHandler(Handler):
             return ''
 
 
-## Welcome Page Handler
-# Handles requests for the '/welcome' url
-
 class WelcomeHandler(Handler):
+    """Web page handler for '/welcome' page
+    Is the page user is redirected to after creating an account
+    """
+
     def get(self):
+        """ Handles GET requests for '/welcome' page"""
         new_cookie = self.read_secure_cookie('new')
         # if doesn't have 'new' cookie or is not logged in redirect
         # to default page
