@@ -307,14 +307,19 @@ class WelcomeHandler(Handler):
         self.remove_cookie('new')
         self.render("welcome.html", user=self.user)
 
-## Sign In Page Handler
-# Handles requests for the '/signin' url
 
 class SignInHandler(Handler):
+    """Web page handler for '/signin' page"""
+
     def get(self):
+        """Handles GET requests for '/signin' page"""
         self.render("signin.html")
 
     def post(self):
+        """Handles POST request for '/signin' page
+        Verify if login information entered is correct and signs in the user
+        if it is
+        """
         # get post parameters
         user = self.request.get('username')
         user_password = self.request.get('password')
@@ -356,17 +361,18 @@ class SignInHandler(Handler):
                         password_error='Invalid password')
             return
 
-
         self.login(user_obj)
         self.redirect('/')
 
 
-## Logout Page Handler
-# Handles requests for the '/logout' url
-
 class LogoutHandler(Handler):
+    """Web page handler for '/logout' page"""
+
     def get(self):
-        self.response.delete_cookie('user_id')
+        """Handles GET requests for '/logout' page
+        Deletes logout cookie and redirects user to sign in page
+        """
+        self.logout()
         self.redirect('/signin')
 
 
