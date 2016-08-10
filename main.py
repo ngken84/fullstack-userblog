@@ -49,7 +49,8 @@ class Handler(webapp2.RequestHandler):
         """
         self.response.out.write(*a, **kw)
 
-    def render_str(self, template, **params):
+    @staticmethod
+    def render_str(template, **params):
         """ Return a string of a rendered Jinja2 template using passed
         parameters
 
@@ -69,7 +70,8 @@ class Handler(webapp2.RequestHandler):
         """
         self.write(self.render_str(template, **kw))
 
-    def make_secure_val(self, val):
+    @staticmethod
+    def make_secure_val(val):
         """Return a string ready to be used as a secure cookie
 
         Keyword arguments:
@@ -249,7 +251,8 @@ class SignUpHandler(Handler):
         else:
             return "Please enter a password"
 
-    def get_password2_error(self, password, verify):
+    @staticmethod
+    def get_password2_error(password, verify):
         """Returns error string if password & verify password is invalid,
         otherwise returns empty string
 
