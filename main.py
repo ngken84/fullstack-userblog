@@ -14,78 +14,132 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import webapp2
+
 import os
-import jinja2
-import string
 import re
 import hmac
 import time
 import logging
+import webapp2
+import jinja2
 from mydbmodels import *
 
 # jinja2 initialization
-template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(autoescape=False, loader = jinja2.FileSystemLoader(template_dir))
-_external = True
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
+JINJA_ENV = jinja2.Environment(autoescape=False,
+                               loader=jinja2.FileSystemLoader(TEMPLATE_DIR))
 
 
 #####################
 # Web Page Handlers #
 #####################
 
-## Web Page Handler Template
-# Template for which all page handlers inherit from
-# Includes helper functions
-
 class Handler(webapp2.RequestHandler):
+    """Handler class is the parent class for all RequestHandlers used in this
+    web application. It has useful functions for writing cookies, rendering
+    templates and logging users in and out.
+    """
+
     def write(self, *a, **kw):
+        """Write HTTP response
+
+        Keyword arguments:
+        a -- string to write
+        kw -- dictionary of arguments to write response with
+        """
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
-        t = jinja_env.get_template(template)
+        """ Return a string of a rendered Jinja2 template using passed
+        parameters
+
+        Keyword arguments:
+        template -- name of the template to render
+        params -- params to use to render the template
+        """
+        t = JINJA_ENV.get_template(template)
         return t.render(params)
 
     def render(self, template, **kw):
+        """Write a HTTP response using template and parameters
+
+        Keyword arguments:
+        template -- name of template to render
+        params -- params to use to render the template
+        """
         self.write(self.render_str(template, **kw))
 
     def make_secure_val(self, val):
+        """Return a string ready to be used as a secure cookie
+
+        Keyword arguments:
+        val -- value to make into a secure string
+        """
         return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
 
     def check_secure_val(self, secure_val):
+        """Returns the value if the passed secured value is valid
+        else returns None
+
+        Keyword arguments:
+        secure_val -- the value that needs to be validated
+        """
         val = secure_val.split('|')[0]
-        if(secure_val == self.make_secure_val(val)):
+        if secure_val == self.make_secure_val(val):
             return val
 
     def set_secure_cookie(self, name, val):
+        """Sets a cookie that is verified with a hashed value
+
+        Keyword arguments:
+        name -- name of the cookie
+        val -- value of the cookie
+        """
         cookie_val = self.make_secure_val(val)
         self.response.headers.add_header('Set-Cookie',
                                          '%s=%s; Path=/' % (name, cookie_val))
 
     def read_secure_cookie(self, name):
+        """Returns the value of a secure cookie
+
+        Keyword arguments:
+        name -- name of the cookie
+        """
         cookie_val = self.request.cookies.get(name)
-        if(cookie_val):
+        if cookie_val:
             return self.check_secure_val(cookie_val)
 
     def remove_cookie(self, name):
+        """Removes a cookie of a given name
+
+        Keyword arguments:
+        name -- name of the cookie to remove
+        """
         self.response.headers.add_header('Set-Cookie', '%s=; Path=/' % name)
 
     def login(self, user):
+        """Sets a secure cookie that indicates that a user is logged in
+
+        Keyword arguments:
+        user -- the user id of the user to be logged in
+        """
         self.set_secure_cookie('user_id', str(user.key().id()))
 
     def logout(self):
+        """Logs out the user by removing the 'user_id' cookie"""
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
     def initialize(self, *a, **kw):
+        """Overrides the initialize function, if the user is logged in
+        sets the user's User to self.user
+        """
         webapp2.RequestHandler.initialize(self, *a, **kw)
-        logging.info('MyHandlerTemplate::initialize')
         uid = self.read_secure_cookie('user_id')
-        logging.info(uid)
         if uid:
             self.user = User.by_id(int(uid))
         else:
             self.user = None
-            
+
 
 ## Main Page Handler
 # Handles requests for the '/' url
@@ -95,12 +149,12 @@ class MainHandler(Handler):
         all_posts = BlogPost.get_latest()
         if self.user:
             self.render("index.html",
-                        user = self.user,
-                        posts = all_posts)
+                        user=self.user,
+                        posts=all_posts)
         else:
             self.render("index.html",
-                        posts = all_posts)
-        
+                        posts=all_posts)
+
 
 ## Sign Up Page Handler
 # Handles requests for the '/newaccount' url
@@ -116,28 +170,28 @@ class SignUpHandler(Handler):
         verify = self.request.get('verify')
         mail = self.request.get('email')
         # get all error messages
-        user_error = self.getUsernameError(user)
+        user_error = self.get_username_error(user)
         pass_error = self.getPassword1Error(user_password, verify)
         ver_error = self.getPassword2Error(user_password, verify)
         em_error = self.getEmailError(mail)
         # if error message exists, reloade the sign up page with errors
         if user_error or pass_error or ver_error or em_error:
-            self.render('signup.html', username = user,
-                        email = mail,
-                        username_error = user_error,
-                        password_error = pass_error,
-                        email_error = em_error,
-                        verify_error = ver_error)
+            self.render('signup.html', username=user,
+                        email=mail,
+                        username_error=user_error,
+                        password_error=pass_error,
+                        email_error=em_error,
+                        verify_error=ver_error)
             return
         # no error messages found, register user and redirect to
         # welcome page
         u = User.register(user, user_password, mail)
         u.put()
-        self.set_secure_cookie('new','new')
+        self.set_secure_cookie('new', 'new')
         self.login(u)
         time.sleep(1)
         self.redirect('/welcome')
-        
+
 
     # returns true if a username string is valid
     def valid_username(self, username):
@@ -146,18 +200,18 @@ class SignUpHandler(Handler):
 
     # returns error message if passed username is invalid
     # returns empty string if passed username is valid
-    def getUsernameError(self, user):
-        if(user):
+    def get_username_error(self, user):
+        if user:
             users = db.GqlQuery("SELECT * FROM User WHERE "
                                 " username =:1 LIMIT 1", user)
             # Is a user already exists with the same username?
-            if(users.count() != 0):
+            if users.count() != 0:
                 return "User with that name already exists"
             # Is the username valid
-            elif(not self.valid_username(user)):
+            elif not self.valid_username(user):
                 return 'Please enter a valid username'
             else:
-                return ''      
+                return ''
         else:
             return "No user name entered"
 
@@ -165,12 +219,12 @@ class SignUpHandler(Handler):
     def valid_password(self, password):
         pass_re = re.compile(r"^.{3,20}$")
         return pass_re.match(password)
-    
+
     # returns an error message string if the passed password is invalid
     # returns an empty string if the passed password is valid
     def getPassword1Error(self, password, verify):
-        if(password):
-            if(not self.valid_password(password)):
+        if password:
+            if not self.valid_password(password):
                 return "Please enter a valid password"
             return ''
         else:
@@ -180,8 +234,8 @@ class SignUpHandler(Handler):
     # inputs are invalid
     # return an empty string if they are valid
     def getPassword2Error(self, password, verify):
-        if(password and verify):
-            if(verify != password):
+        if password and verify:
+            if verify != password:
                 return "Passwords do not match"
             return ''
         else:
@@ -195,12 +249,12 @@ class SignUpHandler(Handler):
     # returns an error message string if the passed email address is invalid
     # returns and empty string if passed email is valid
     def getEmailError(self, email):
-        if(email):
-            if(not self.valid_email(email)):
+        if email:
+            if not self.valid_email(email):
                 return "Please enter a valid email"
             emails = db.GqlQuery("SELECT * FROM User WHERE email =:1"
                                  "LIMIT 1", email)
-            if(emails.count() != 0):
+            if emails.count() != 0:
                 return "A user with that email account is already registered"
             return ''
         else:
@@ -215,11 +269,11 @@ class WelcomeHandler(Handler):
         new_cookie = self.read_secure_cookie('new')
         # if doesn't have 'new' cookie or is not logged in redirect
         # to default page
-        if(not new_cookie or not new_cookie == 'new' or not self.user):
+        if not new_cookie or not new_cookie == 'new' or not self.user:
             self.redirect('/')
             return
         self.remove_cookie('new')
-        self.render("welcome.html", user = self.user)
+        self.render("welcome.html", user=self.user)
 
 ## Sign In Page Handler
 # Handles requests for the '/signin' url
@@ -246,9 +300,9 @@ class SignInHandler(Handler):
         # if errors exists re-render pages with errors
         if usr_error or pss_error:
             self.render("signin.html",
-                        username = user,
-                        username_error = usr_error,
-                        password_error = pss_error)
+                        username=user,
+                        username_error=usr_error,
+                        password_error=pss_error)
             return
 
         # gets user
@@ -258,23 +312,23 @@ class SignInHandler(Handler):
         if not user_obj:
             usr_error = 'User does not exist by that user name'
             self.render("signin.html",
-                        username = user,
-                        username_error = usr_error)
+                        username=user,
+                        username_error=usr_error)
             return
 
-        # check if password matches, if fails 
+        # check if password matches, if fails
         salt = user_obj.password.split("|")[1]
         if not user_obj.password == User.make_pw_hash(user, user_password, salt):
             self.render("signin.html",
-                        username = user,
-                        password_error = 'Invalid password')
+                        username=user,
+                        password_error='Invalid password')
             return
 
-        
+
         self.login(user_obj)
         self.redirect('/')
-           
-        
+
+
 ## Logout Page Handler
 # Handles requests for the '/logout' url
 
@@ -289,11 +343,11 @@ class LogoutHandler(Handler):
 
 class NewPostHandler(Handler):
     def get(self):
-        if(not self.user):
+        if not self.user:
             self.redirect('../signin')
             return
         self.render('newpost.html',
-                    user = self.user)
+                    user=self.user)
 
     def post(self):
         if not self.user:
@@ -318,21 +372,21 @@ class NewPostHandler(Handler):
         # if error message is set, render page with errors
         if body_error or sub_error:
             self.render('newpost.html',
-                        user = self.user,
-                        subject = sub,
-                        body_text = body,
-                        subject_error = sub_error,
-                        body_error = body_error)
+                        user=self.user,
+                        subject=sub,
+                        body_text=body,
+                        subject_error=sub_error,
+                        body_error=body_error)
             return
 
-        b = BlogPost(subject = sub,
-                     blog = body,
-                     username = self.user.username,
-                     like_count = 0)
+        b = BlogPost(subject=sub,
+                     blog=body,
+                     username=self.user.username,
+                     like_count=0)
         b.put()
         memcache.set('top', None)
         self.redirect('/blog/%s' % b.key().id())
-        
+
 ## Blog Handler
 # Handles requests for the '/blog' url
 
@@ -346,18 +400,18 @@ class BlogHandler(Handler):
         if user_id:
             other_user = User.by_name(user_id)
             if other_user:
-                p = BlogPost.latest_by_name(user_id) 
+                p = BlogPost.latest_by_name(user_id)
         elif my_user:
-            p = BlogPost.latest_by_name(self.user.username) 
-            
+            p = BlogPost.latest_by_name(self.user.username)
+
         if not my_user and other_user is None:
             self.redirect('../signin')
             return
 
         self.render("blog.html",
-                    user = my_user,
-                    other_user = user_id,
-                    posts = p)
+                    user=my_user,
+                    other_user=user_id,
+                    posts=p)
 
 
 ## Blog Page Handler
@@ -366,8 +420,9 @@ class BlogHandler(Handler):
 class BlogPostHandler(Handler):
 
     def can_user_like(cls, user, post_id, username):
-        return not BlogPostLikes.has_user_liked(post_id, user.username) and not user.username == username
-    
+        return not BlogPostLikes.has_user_liked(post_id, user.username) and \
+               not user.username == username
+
     def get(self, blog_id):
         p = BlogPost.get_by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
@@ -378,10 +433,10 @@ class BlogPostHandler(Handler):
                 myuser = self.user
                 can_like = self.can_user_like(myuser, blog_id, p.username)
             self.render("blogpost.html",
-                        user = myuser,
-                        can_like = can_like,
-                        blogpost = p,
-                        comments = comments)
+                        user=myuser,
+                        can_like=can_like,
+                        blogpost=p,
+                        comments=comments)
         else:
             self.redirect('../')
 
@@ -398,40 +453,40 @@ class BlogPostHandler(Handler):
         myuser = self.user
         if not myuser:
             self.render("blogpost.html",
-                        user = myuser,
-                        can_like = False,
-                        blogpost = p,
-                        errormsg = "You must be logged in to perform that action",
-                        comments = comments)
+                        user=myuser,
+                        can_like=False,
+                        blogpost=p,
+                        errormsg="You must be logged in to perform that action",
+                        comments=comments)
             return
 
         # if has post parameter 'like' then it is a like
         if self.request.get('like') == 'like':
             if BlogPostLikes.has_user_liked(blog_id, myuser.username):
                 self.render("blogpost.html",
-                            user = myuser,
-                            can_like = False,
-                            blogpost = p,
-                            errormsg = "You have already 'liked' this post",
-                            comments = comments)
+                            user=myuser,
+                            can_like=False,
+                            blogpost=p,
+                            errormsg="You have already 'liked' this post",
+                            comments=comments)
             elif myuser.username == p.username:
                 self.render("blogpost.html",
-                            user = myuser,
-                            can_like = False,
-                            blogpost = p,
-                            errormsg = "You can't like your own post",
-                            comments = comments)
+                            user=myuser,
+                            can_like=False,
+                            blogpost=p,
+                            errormsg="You can't like your own post",
+                            comments=comments)
             else:
-                new_like = BlogPostLikes(post_key_id = int(blog_id),
-                                         username = myuser.username)
+                new_like = BlogPostLikes(post_key_id=int(blog_id),
+                                         username=myuser.username)
                 new_like.put()
                 p.like_count = p.like_count + 1
                 p.put()
                 self.render("blogpost.html",
-                        user = myuser,
-                        can_like = False,
-                        blogpost = p,
-                        comments = comments)
+                            user=myuser,
+                            can_like=False,
+                            blogpost=p,
+                            comments=comments)
 
         # if has post parameter 'delete' then delete the post
         elif self.request.get('delete') == 'delete':
@@ -443,21 +498,21 @@ class BlogPostHandler(Handler):
             else:
                 can_like = self.can_user_like(myuser, blog_id, myuser.username)
                 self.render("blogpost.html",
-                            user = myuser,
-                            can_like = can_like,
-                            blogpost = p,
-                            errormsg = "You can't delete this post.",
-                            comments = comments)
+                            user=myuser,
+                            can_like=can_like,
+                            blogpost=p,
+                            errormsg="You can't delete this post.",
+                            comments=comments)
         # if has post parameter 'deletecomment' then delete the comment
         elif self.request.get('deletecomment') == 'delete':
             cid = self.request.get('comment')
             if myuser == None:
                 self.render("blogpost.html",
-                            user = myuser,
-                            can_like = False,
-                            blogpost = p,
-                            errormsg = "You must be logged in to delete a comment",
-                            comments = comments)
+                            user=myuser,
+                            can_like=False,
+                            blogpost=p,
+                            errormsg="You must be logged in to delete a comment",
+                            comments=comments)
                 return
             elif cid:
                 markedcomm = Comment.by_id(cid)
@@ -469,35 +524,35 @@ class BlogPostHandler(Handler):
                 else:
                     can_like = self.can_user_like(myuser, blog_id, myuser.username)
                     self.render("blogpost.html",
-                                user = myuser,
-                                can_like = can_like,
-                                blogpost = p,
-                                errormsg = "You do not have permission to delete this post",
-                                comments = comments)
+                                user=myuser,
+                                can_like=can_like,
+                                blogpost=p,
+                                errormsg="You do not have permission to delete this post",
+                                comments=comments)
                     return
         # user is attempting to post a new comment
         else:
             can_like = self.can_user_like(myuser, blog_id, myuser.username)
             comment = self.request.get('newComment')
             if comment:
-                comment_db = Comment(post_key_id = int(blog_id),
-                                     author = myuser.username,
-                                     comment = comment)
+                comment_db = Comment(post_key_id=int(blog_id),
+                                     author=myuser.username,
+                                     comment=comment)
                 comment_db.put()
                 comments = [comment_db] + comments
                 self.render("blogpost.html",
-                            user = myuser,
-                            can_like = can_like,
-                            blogpost = p,
-                            comments = comments)
+                            user=myuser,
+                            can_like=can_like,
+                            blogpost=p,
+                            comments=comments)
             else:
                 self.render("blogpost.html",
-                            user = myuser,
-                            can_like = can_like,
-                            blogpost = p,
-                            errormsg = "You must enter a comment",
-                            comments = comments)
-        
+                            user=myuser,
+                            can_like=can_like,
+                            blogpost=p,
+                            errormsg="You must enter a comment",
+                            comments=comments)
+
 
 ## Edit Blog Page Handler
 # Handles requests for the '/editblog/(\d+)/?' url
@@ -505,29 +560,29 @@ class BlogPostHandler(Handler):
 class EditPostHandler(Handler):
 
     def get(self, blog_id):
-        if(not self.user):
+        if not self.user:
             self.redirect('../signin')
             return
         p = BlogPost.get_by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
-        
+
         self.render("editpost.html",
-                    user = self.user,
-                    blogpost = p,
-                    comments = comments)
+                    user=self.user,
+                    blogpost=p,
+                    comments=comments)
 
     def post(self, blog_id):
-        if(not self.user):
+        if not self.user:
             self.redirect('../signin')
             return
         p = BlogPost.get_by_id(int(blog_id))
         if self.user.username != p.username:
             comments = Comment.get_comments_for_post(blog_id)
             self.render("editpost.html",
-                        user = self.user,
-                        blogpost = p,
-                        comments = comments,
-                        error_msg = 'You are not the owner of this post.')
+                        user=self.user,
+                        blogpost=p,
+                        comments=comments,
+                        error_msg='You are not the owner of this post.')
             return
         edits = self.request.get('blog')
         if edits:
@@ -538,18 +593,18 @@ class EditPostHandler(Handler):
         else:
             comments = Comment.get_comments_for_post(blog_id)
             self.render("editpost.html",
-                        user = self.user,
-                        blogpost = p,
-                        comments = comments,
-                        errormsg = 'Please enter some text.')
-                        
+                        user=self.user,
+                        blogpost=p,
+                        comments=comments,
+                        errormsg='Please enter some text.')
+
 ## Edit Comment Page Handler
 # Handles requests for the '/editcomment/(\d+)/?' url
 
 class EditCommentHandler(Handler):
 
     def get(self, comment_id):
-        if(not self.user):
+        if not self.user:
             self.redirect('../signin')
             return
         comment = Comment.by_id(comment_id)
@@ -561,12 +616,12 @@ class EditCommentHandler(Handler):
             self.redirect('../blog')
             return
         self.render("editcomment.html",
-                    user = self.user,
-                    blogpost = p,
-                    comment = comment)
+                    user=self.user,
+                    blogpost=p,
+                    comment=comment)
 
     def post(self, comment_id):
-        if(not self.user):
+        if not self.user:
             self.redirect('../signin')
             return
         comment = Comment.by_id(comment_id)
@@ -576,25 +631,25 @@ class EditCommentHandler(Handler):
         if comment.author != self.user.username:
             p = BlogPost.get_by_id(comment.post_key_id)
             self.render("editcomment.html",
-                        user = self.user,
-                        blogpost = p,
-                        comment = comment,
-                        errormsg = "You can't edit another user's comment")
-            return     
+                        user=self.user,
+                        blogpost=p,
+                        comment=comment,
+                        errormsg="You can't edit another user's comment")
+            return
         newcomment = self.request.get('comment')
         if not newcomment:
             p = BlogPost.get_by_id(comment.post_key_id)
             self.render("editcomment.html",
-                        user = self.user,
-                        blogpost = p,
-                        comment = comment,
-                        errormsg = "Please enter some text")
+                        user=self.user,
+                        blogpost=p,
+                        comment=comment,
+                        errormsg="Please enter some text")
             return
         comment.comment = newcomment
         comment.put()
         time.sleep(1)
         self.redirect('../blog/%s' % comment.post_key_id)
-                        
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
