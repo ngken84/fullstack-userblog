@@ -141,19 +141,17 @@ class Handler(webapp2.RequestHandler):
             self.user = None
 
 
-## Main Page Handler
-# Handles requests for the '/' url
-
 class MainHandler(Handler):
+    """The Web Page Handler for '/' page"""
+
     def get(self):
+        """Handles GET requests for '/'"""
         all_posts = BlogPost.get_latest()
-        if self.user:
-            self.render("index.html",
-                        user=self.user,
-                        posts=all_posts)
-        else:
-            self.render("index.html",
-                        posts=all_posts)
+        myuser = self.user
+        self.render("index.html",
+                    user=myuser,
+                    posts=all_posts)
+
 
 
 ## Sign Up Page Handler
