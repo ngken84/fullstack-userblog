@@ -382,18 +382,22 @@ class LogoutHandler(Handler):
         self.redirect('/signin')
 
 
-## New Blog Page Handler
-# Handles requests for the '/blog/newpost' url
-
 class NewPostHandler(Handler):
+    """Web page handler for '/blog/newpost/' url
+    Page is for creating new Blog Posts
+    """
+
     def get(self):
-        if not self.user:
-            self.redirect('../signin')
-            return
+        """Handles GET requests for '/blog/newpost/' page"""
+        myuser = self.user
         self.render('newpost.html',
-                    user=self.user)
+                    user=myuser)
 
     def post(self):
+        """Handles POST requests for '/blog/newpost/' page
+        Determines if the new post is valid and then creates a new blog post if
+        is valid.
+        """
         if not self.user:
             self.redirect('../signin')
             return
@@ -423,13 +427,13 @@ class NewPostHandler(Handler):
                         body_error=body_error)
             return
 
-        b = BlogPost(subject=sub,
+        newpost = BlogPost(subject=sub,
                      blog=body,
                      username=self.user.username,
                      like_count=0)
-        b.put()
+        newpost.put()
         memcache.set('top', None)
-        self.redirect('/blog/%s' % b.key().id())
+        self.redirect('/blog/%s' % newpost.key().id())
 
 ## Blog Handler
 # Handles requests for the '/blog' url
