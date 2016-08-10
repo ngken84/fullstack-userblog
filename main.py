@@ -145,7 +145,7 @@ class MainHandler(Handler):
     """The Web Page Handler for '/' page"""
 
     def get(self):
-        """Handles GET requests for '/'"""
+        """Handles GET requests for '/' page"""
         all_posts = BlogPost.get_latest()
         myuser = self.user
         self.render("index.html",
@@ -153,15 +153,19 @@ class MainHandler(Handler):
                     posts=all_posts)
 
 
-
-## Sign Up Page Handler
-# Handles requests for the '/newaccount' url
-
 class SignUpHandler(Handler):
+    """Web page handler for '/newaccount' page
+    Allows user to create new accounts
+    """
+
     def get(self):
+        """ Handles GET requests for '/newaccount' page"""
         self.render("signup.html")
 
     def post(self):
+        """ Handles POST requests for 'newaccount' page
+        Takes request parameters and registers users
+        """
         # get all post parameters
         user = self.request.get('username')
         user_password = self.request.get('password')
@@ -190,15 +194,22 @@ class SignUpHandler(Handler):
         time.sleep(1)
         self.redirect('/welcome')
 
-
-    # returns true if a username string is valid
     def valid_username(self, username):
+        """returns True if passed username is valid
+
+        Keyword Arguments:
+        username -- value that will be tested
+        """
         user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
         return user_re.match(username)
 
-    # returns error message if passed username is invalid
-    # returns empty string if passed username is valid
     def get_username_error(self, user):
+        """Returns error string if username is invalid otherwise
+        returns empty string
+
+        Keyword Arguments:
+        user -- value that will be tested
+        """
         if user:
             users = db.GqlQuery("SELECT * FROM User WHERE "
                                 " username =:1 LIMIT 1", user)
@@ -213,14 +224,22 @@ class SignUpHandler(Handler):
         else:
             return "No user name entered"
 
-    # returns true if passed password is valid
     def valid_password(self, password):
+        """Returns True if passed value is a valid password
+
+        Keyword Arguments:
+        password -- value that will be tested
+        """
         pass_re = re.compile(r"^.{3,20}$")
         return pass_re.match(password)
 
-    # returns an error message string if the passed password is invalid
-    # returns an empty string if the passed password is valid
     def get_password1_error(self, password):
+        """Returns error string if password is invalid,
+        otherwise returns empty string
+
+        Keyword Arguments:
+        password -- value to be tested
+        """
         if password:
             if not self.valid_password(password):
                 return "Please enter a valid password"
@@ -228,10 +247,14 @@ class SignUpHandler(Handler):
         else:
             return "Please enter a password"
 
-    # returns an error message string if the passed password & verify
-    # inputs are invalid
-    # return an empty string if they are valid
     def get_password2_error(self, password, verify):
+        """Returns error string if password & verify password is invalid,
+        otherwise returns empty string
+
+        Keyword Arguments:
+        password -- value to be tested
+        verify -- value to be tested
+        """
         if password and verify:
             if verify != password:
                 return "Passwords do not match"
@@ -239,19 +262,28 @@ class SignUpHandler(Handler):
         else:
             return "Please enter both password and confirm password fields"
 
-    # returns true if passed email address is a valid formated email
     def valid_email(self, email):
+        """Returns True if passed email is valid
+
+        Keyword Arguments:
+        email - value to be tested
+        """
         email_re = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
         return email_re.match(email)
 
-    # returns an error message string if the passed email address is invalid
-    # returns and empty string if passed email is valid
     def get_email_error(self, email):
+        """Returns error string if email is invalid,
+        otherwise returns empty string
+
+        Keyword Arguments:
+        email -- value to be tested
+        """
         if email:
             if not self.valid_email(email):
                 return "Please enter a valid email"
             emails = db.GqlQuery("SELECT * FROM User WHERE email =:1"
                                  "LIMIT 1", email)
+            ### Ensure that email is not already in use
             if emails.count() != 0:
                 return "A user with that email account is already registered"
             return ''
