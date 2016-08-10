@@ -194,7 +194,8 @@ class SignUpHandler(Handler):
         time.sleep(1)
         self.redirect('/welcome')
 
-    def valid_username(self, username):
+    @staticmethod
+    def valid_username(username):
         """returns True if passed username is valid
 
         Keyword Arguments:
@@ -224,7 +225,8 @@ class SignUpHandler(Handler):
         else:
             return "No user name entered"
 
-    def valid_password(self, password):
+    @staticmethod
+    def valid_password(password):
         """Returns True if passed value is a valid password
 
         Keyword Arguments:
@@ -262,7 +264,8 @@ class SignUpHandler(Handler):
         else:
             return "Please enter both password and confirm password fields"
 
-    def valid_email(self, email):
+    @staticmethod
+    def valid_email(email):
         """Returns True if passed email is valid
 
         Keyword Arguments:
