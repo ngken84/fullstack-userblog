@@ -25,9 +25,6 @@ import logging
 from google.appengine.api import memcache
 from google.appengine.ext import db
 
-# Hash secret value
-secret = "aeEVC821md8D8KJid810123EMdieMDCHZPQlaelD"
-
 #############
 # DB MODELS #
 #############
@@ -68,6 +65,18 @@ class User(db.Model):
         for i in range(0,5):
             retval = retval + random.choice(string.ascii_letters)
         return retval
+
+    @classmethod
+    def does_user_exist(cls, username):
+        users = db.GqlQuery("SELECT * FROM User WHERE "
+                            " username =:1 LIMIT 1", username)
+        return users.count() != 0
+
+    @classmethod
+    def is_email_taken(cls, email):
+        emails = db.GqlQuery("SELECT * FROM User WHERE email =:1"
+                             "LIMIT 1", email)
+        return emails.count() != 0
 
 
 ## User Blog Post Model

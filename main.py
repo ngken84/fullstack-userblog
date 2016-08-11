@@ -21,13 +21,18 @@ import hmac
 import time
 import webapp2
 import jinja2
-from mydbmodels import *
+from mydbmodels import BlogPost
+from mydbmodels import User
+from mydbmodels import Comment
+from mydbmodels import BlogPostLikes
 
 # jinja2 initialization
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 JINJA_ENV = jinja2.Environment(autoescape=False,
                                loader=jinja2.FileSystemLoader(TEMPLATE_DIR))
 
+# Hash secret value
+SECRET = "aeEVC821md8D8KJid810123EMdieMDCHZPQlaelD"
 
 #####################
 # Web Page Handlers #
@@ -76,7 +81,7 @@ class Handler(webapp2.RequestHandler):
         Keyword arguments:
         val -- value to make into a secure string
         """
-        return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
+        return '%s|%s' % (val, hmac.new(SECRET, val).hexdigest())
 
     def check_secure_val(self, secure_val):
         """Returns the value if the passed secured value is valid
@@ -213,10 +218,8 @@ class SignUpHandler(Handler):
         user -- value that will be tested
         """
         if user:
-            users = db.GqlQuery("SELECT * FROM User WHERE "
-                                " username =:1 LIMIT 1", user)
             # Is a user already exists with the same username?
-            if users.count() != 0:
+            if User.does_user_exist(user):
                 return "User with that name already exists"
             # Is the username valid
             elif not self.valid_username(user):
@@ -286,10 +289,8 @@ class SignUpHandler(Handler):
         if email:
             if not self.valid_email(email):
                 return "Please enter a valid email"
-            emails = db.GqlQuery("SELECT * FROM User WHERE email =:1"
-                                 "LIMIT 1", email)
             ### Ensure that email is not already in use
-            if emails.count() != 0:
+            if User.is_email_taken(email):
                 return "A user with that email account is already registered"
             return ''
         else:
@@ -431,7 +432,7 @@ class NewPostHandler(Handler):
                            username=self.user.username,
                            like_count=0)
         newpost.put()
-        memcache.set('top', None)
+        BlogPost.flush_cache()
         self.redirect('/blog/%s' % newpost.key().id())
 
 
