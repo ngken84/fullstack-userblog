@@ -19,7 +19,6 @@ import os
 import re
 import hmac
 import time
-import logging
 import webapp2
 import jinja2
 from mydbmodels import *
@@ -435,23 +434,29 @@ class NewPostHandler(Handler):
         memcache.set('top', None)
         self.redirect('/blog/%s' % newpost.key().id())
 
-## Blog Handler
-# Handles requests for the '/blog' url
 
 class BlogHandler(Handler):
+    """Web page handler for '/blog/' url """
+
     def get(self):
+        """Handles GET requests for '/blog/' page """
         user_id = self.request.get('user')
         my_user = self.user
         post = None
         other_user = None
 
+        # if user_id exists, then get the user is trying to view only posts by
+        # another user
         if user_id:
             other_user = User.by_name(user_id)
             if other_user:
                 post = BlogPost.latest_by_name(user_id)
+        # if user_id does not exist, then only get posts by the logged in user
         elif my_user:
             post = BlogPost.latest_by_name(self.user.username)
 
+        # if not requesting another user's posts or your own posts
+        # redirect to sign in page
         if not my_user and other_user is None:
             self.redirect('../signin')
             return
