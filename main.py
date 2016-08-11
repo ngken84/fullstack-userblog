@@ -427,9 +427,9 @@ class NewPostHandler(Handler):
             return
 
         newpost = BlogPost(subject=sub,
-                     blog=body,
-                     username=self.user.username,
-                     like_count=0)
+                           blog=body,
+                           username=self.user.username,
+                           like_count=0)
         newpost.put()
         memcache.set('top', None)
         self.redirect('/blog/%s' % newpost.key().id())
@@ -467,16 +467,27 @@ class BlogHandler(Handler):
                     posts=post)
 
 
-## Blog Page Handler
-# Handles requests for the '/blog/(\d+)/?' url
-
 class BlogPostHandler(Handler):
+    """Web page handler for '/blog/(d+)/?' url """
 
-    def can_user_like(cls, user, post_id, username):
+    @staticmethod
+    def can_user_like(user, post_id, username):
+        """Returns true if a passed user is able to like a post
+
+        Keyword Arguments:
+        user -- the user that is being tested if is allowed to like a post
+        post_id -- the post id for the post
+        username -- the author of the post
+        """
         return not BlogPostLikes.has_user_liked(post_id, user.username) and \
                not user.username == username
 
     def get(self, blog_id):
+        """Handles GET requests for '/blog/(d+)/?' page
+
+        Keyword Arguments:
+        blog_id -- id for the blog to be rendered
+        """
         post = BlogPost.get_by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
         if post:
@@ -494,6 +505,16 @@ class BlogPostHandler(Handler):
             self.redirect('../')
 
     def post(self, blog_id):
+        """Handles POST requests for '/blog/(d+)/?' page
+        This has to handle a lot of different POSTS:
+        - likes
+        - new comments
+        - deleting posts
+        - deleting comments
+
+        Keyword Arguments:
+        blog_id -- id for the blog to be rendered
+        """
         post = BlogPost.get_by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
 
@@ -559,7 +580,7 @@ class BlogPostHandler(Handler):
         # if has post parameter 'deletecomment' then delete the comment
         elif self.request.get('deletecomment') == 'delete':
             cid = self.request.get('comment')
-            if myuser == None:
+            if myuser is None:
                 self.render("blogpost.html",
                             user=myuser,
                             can_like=False,
@@ -607,12 +628,15 @@ class BlogPostHandler(Handler):
                             comments=comments)
 
 
-## Edit Blog Page Handler
-# Handles requests for the '/editblog/(\d+)/?' url
-
 class EditPostHandler(Handler):
+    """Web page handler for '/editblog/(d+)/?' url """
 
     def get(self, blog_id):
+        """Handles GET requests for '/editblog/(d+)/?' page
+
+        Keyword Arguments:
+        blog_id -- id for the blog to be rendered
+        """
         if not self.user:
             self.redirect('../signin')
             return
@@ -625,10 +649,16 @@ class EditPostHandler(Handler):
                     comments=comments)
 
     def post(self, blog_id):
+        """Handles POST requests for '/editblog/(d+)/?' page
+
+        Keyword Arguments:
+        blog_id -- id for the blog to be rendered
+        """
         if not self.user:
             self.redirect('../signin')
             return
         post = BlogPost.get_by_id(int(blog_id))
+        # make sure the post author and logged in user are the same person
         if self.user.username != post.username:
             comments = Comment.get_comments_for_post(blog_id)
             self.render("editpost.html",
@@ -651,10 +681,9 @@ class EditPostHandler(Handler):
                         comments=comments,
                         errormsg='Please enter some text.')
 
-## Edit Comment Page Handler
-# Handles requests for the '/editcomment/(\d+)/?' url
 
 class EditCommentHandler(Handler):
+    """Web page handler for '/editcomment/(d+)/?' url """
 
     def get(self, comment_id):
         if not self.user:
