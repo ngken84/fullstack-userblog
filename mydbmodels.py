@@ -103,6 +103,11 @@ class BlogPost(db.Model):
     def flush_cache(cls):
         memcache.set('top', None)
 
+    @classmethod
+    def by_id(cls, bid):
+        return db.GqlQuery("SELECT * FROM BlogPost WHERE __key__ = KEY"
+                           "(\'BlogPost\', %s)" % int(bid)).get()
+
 ## Blog Post Likes Model
 class BlogPostLikes(db.Model):
     post_key_id = db.IntegerProperty()
@@ -115,8 +120,8 @@ class BlogPostLikes(db.Model):
                             " username = '%s' " % (post_id, user))
         likes = list(likes)
         return len(likes) > 0
-        
-        
+
+
 ## Comment Model
 class Comment(db.Model):
     post_key_id = db.IntegerProperty()
@@ -140,6 +145,6 @@ class Comment(db.Model):
     def formatted_date(self):
         return self.created.strftime('%b %d, %Y')
 
-    
-    
-    
+
+
+

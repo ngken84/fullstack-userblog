@@ -488,7 +488,7 @@ class BlogPostHandler(Handler):
         Keyword Arguments:
         blog_id -- id for the blog to be rendered
         """
-        post = BlogPost.get_by_id(int(blog_id))
+        post = BlogPost.by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
         if post:
             myuser = None
@@ -515,7 +515,7 @@ class BlogPostHandler(Handler):
         Keyword Arguments:
         blog_id -- id for the blog to be rendered
         """
-        post = BlogPost.get_by_id(int(blog_id))
+        post = BlogPost.by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
 
         # if post is not found, redirect
@@ -640,7 +640,7 @@ class EditPostHandler(Handler):
         if not self.user:
             self.redirect('../signin')
             return
-        post = BlogPost.get_by_id(int(blog_id))
+        post = BlogPost.by_id(int(blog_id))
         comments = Comment.get_comments_for_post(blog_id)
 
         self.render("editpost.html",
@@ -657,7 +657,7 @@ class EditPostHandler(Handler):
         if not self.user:
             self.redirect('../signin')
             return
-        post = BlogPost.get_by_id(int(blog_id))
+        post = BlogPost.by_id(int(blog_id))
         # make sure the post author and logged in user are the same person
         if self.user.username != post.username:
             comments = Comment.get_comments_for_post(blog_id)
@@ -693,7 +693,7 @@ class EditCommentHandler(Handler):
         if not comment:
             self.redirect('../blog')
             return
-        post = BlogPost.get_by_id(comment.post_key_id)
+        post = BlogPost.by_id(comment.post_key_id)
         if not post:
             self.redirect('../blog')
             return
@@ -711,7 +711,7 @@ class EditCommentHandler(Handler):
             self.redirect('../blog')
             return
         if comment.author != self.user.username:
-            post = BlogPost.get_by_id(comment.post_key_id)
+            post = BlogPost.by_id(comment.post_key_id)
             self.render("editcomment.html",
                         user=self.user,
                         blogpost=post,
@@ -720,7 +720,7 @@ class EditCommentHandler(Handler):
             return
         newcomment = self.request.get('comment')
         if not newcomment:
-            post = BlogPost.get_by_id(comment.post_key_id)
+            post = BlogPost.by_id(comment.post_key_id)
             self.render("editcomment.html",
                         user=self.user,
                         blogpost=post,
