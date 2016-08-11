@@ -687,6 +687,11 @@ class EditCommentHandler(Handler):
     """Web page handler for '/editcomment/(d+)/?' url """
 
     def get(self, comment_id):
+        """Handles GET requests for '/editcomment/(d+)/?' page
+
+        Keyword Arguments:
+        comment_id -- id for the comment to be rendered
+        """
         if not self.user:
             self.redirect('../signin')
             return
@@ -704,6 +709,11 @@ class EditCommentHandler(Handler):
                     comment=comment)
 
     def post(self, comment_id):
+        """Handles POST requests for '/editcomment/(d+)/?' page
+
+        Keyword Arguments:
+        comment_id -- id for the comment to be rendered
+        """
         if not self.user:
             self.redirect('../signin')
             return
