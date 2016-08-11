@@ -44,6 +44,10 @@ class Handler(webapp2.RequestHandler):
     templates and logging users in and out.
     """
 
+    def __init__(self, request, response):
+        self.initialize(request, response)
+        self.user = None
+
     def write(self, *a, **kw):
         """Write HTTP response
 
