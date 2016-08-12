@@ -68,7 +68,7 @@ class User(db.Model):
         return u
 
     @classmethod
-    def register(cls, name, pw, email = None):
+    def register(cls, name, pw, email=None):
         """Creates a User using the passed parameters and returns it
 
         Keyword Arguments:
@@ -91,7 +91,7 @@ class User(db.Model):
         name -- username
         pw -- password
         """
-        return hashlib.sha256(name+pw+salt).hexdigest()+"|"+salt
+        return hashlib.sha256(name+pw+salt+SECRET).hexdigest()+"|"+salt
 
     @classmethod
     def make_salt(cls):
@@ -126,10 +126,10 @@ class User(db.Model):
 
 ## User Blog Post Model
 class BlogPost(db.Model):
-    subject = db.StringProperty(required = True)
-    blog = db.TextProperty(required = True)
-    created = db.DateTimeProperty(auto_now_add = True)
-    username = db.StringProperty(required = True)
+    subject = db.StringProperty(required=True)
+    blog = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    username = db.StringProperty(required=True)
     like_count = db.IntegerProperty()
 
     @classmethod
