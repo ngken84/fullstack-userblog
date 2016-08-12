@@ -21,18 +21,13 @@ import hmac
 import time
 import webapp2
 import jinja2
-from mydbmodels import BlogPost
-from mydbmodels import User
-from mydbmodels import Comment
-from mydbmodels import BlogPostLikes
+import logging
+from mydbmodels import BlogPost, User, Comment, BlogPostLikes, SECRET
 
 # jinja2 initialization
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 JINJA_ENV = jinja2.Environment(autoescape=False,
                                loader=jinja2.FileSystemLoader(TEMPLATE_DIR))
-
-# Hash secret value
-SECRET = "aeEVC821md8D8KJid810123EMdieMDCHZPQlaelD"
 
 #####################
 # Web Page Handlers #
@@ -46,7 +41,11 @@ class Handler(webapp2.RequestHandler):
 
     def __init__(self, request, response):
         self.initialize(request, response)
-        self.user = None
+        uid = self.read_secure_cookie('user_id')
+        if uid:
+            self.user = User.by_id(int(uid))
+        else:
+            self.user = None
 
     def write(self, *a, **kw):
         """Write HTTP response
@@ -138,17 +137,6 @@ class Handler(webapp2.RequestHandler):
     def logout(self):
         """Logs out the user by removing the 'user_id' cookie"""
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
-
-    def initialize(self, *a, **kw):
-        """Overrides the initialize function, if the user is logged in
-        sets the user's User to self.user
-        """
-        webapp2.RequestHandler.initialize(self, *a, **kw)
-        uid = self.read_secure_cookie('user_id')
-        if uid:
-            self.user = User.by_id(int(uid))
-        else:
-            self.user = None
 
 
 class MainHandler(Handler):
