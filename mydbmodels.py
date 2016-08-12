@@ -29,38 +29,73 @@ from google.appengine.ext import db
 # DB MODELS #
 #############
 
-## User Database Model
+# Hash secret value
+SECRET = "aeEVC821md8D8KJid810123EMdieMDCHZPQlaelD"
+
 class User(db.Model):
-    username = db.StringProperty(required = True)
-    password = db.StringProperty(required = True)
+    """User represents a user of our application.
+
+    Parameters:
+    username -- the user's username. Must be unique
+    password -- user's password which is stored hashed and salted
+    email -- user's user name. Must be unique
+    created -- created date
+    """
+
+    username = db.StringProperty(required=True)
+    password = db.StringProperty(required=True)
     email = db.StringProperty()
-    created = db.DateTimeProperty(auto_now_add = True)
+    created = db.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def by_id(cls, uid):
+        """Retrieves a User with passed user id
+
+        Keyword Arguments:
+        uid -- user id for desired User
+        """
         return db.GqlQuery("SELECT * FROM User WHERE __key__ = KEY"
                            "(\'User\', %s)" % int(uid)).get()
 
     @classmethod
     def by_name(cls, name):
+        """Retrieves a User with the passed username
+
+        Keyword Arguments:
+        name -- username for desired User
+        """
         u = User.all().filter('username =', name).get()
         return u
 
     @classmethod
     def register(cls, name, pw, email = None):
+        """Creates a User using the passed parameters and returns it
+
+        Keyword Arguments:
+        name -- the username for the user
+        pw -- the password for the user
+        email -- the email for the user (defaults to None)
+        """
         if(not email):
             email = None
         pw_hash = cls.make_pw_hash(name, pw, cls.make_salt())
-        return User(username = name,
-                    password = pw_hash,
-                    email = email)
+        return User(username=name,
+                    password=pw_hash,
+                    email=email)
 
     @classmethod
     def make_pw_hash(cls, name, pw, salt):
+        """Creates a password hash using the using a username, password and hash
+
+        Keyword Arguments:
+        name -- username
+        pw -- password
+        """
         return hashlib.sha256(name+pw+salt).hexdigest()+"|"+salt
 
     @classmethod
     def make_salt(cls):
+        """Generates a random 4 letter string to be used as a SALT"""
         retval = ""
         for i in range(0,5):
             retval = retval + random.choice(string.ascii_letters)
@@ -68,12 +103,22 @@ class User(db.Model):
 
     @classmethod
     def does_user_exist(cls, username):
+        """Checks to see if passed username is already in use
+
+        Keyword Arguments:
+        username -- username to be checked to see if exists
+        """
         users = db.GqlQuery("SELECT * FROM User WHERE "
                             " username =:1 LIMIT 1", username)
         return users.count() != 0
 
     @classmethod
     def is_email_taken(cls, email):
+        """Checks to see if passed email is already in use
+
+        Keyword Arguments:
+        email -- email to be checked to see if exists
+        """
         emails = db.GqlQuery("SELECT * FROM User WHERE email =:1"
                              "LIMIT 1", email)
         return emails.count() != 0
