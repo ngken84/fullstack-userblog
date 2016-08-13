@@ -353,7 +353,8 @@ class SignInHandler(Handler):
 
         # check if password matches, if fails
         salt = user_obj.password.split("|")[1]
-        if not user_obj.password == User.make_pw_hash(user, user_password, salt):
+        if (not user_obj.password
+            == User.make_pw_hash(user, user_password, salt)):
             self.render("signin.html",
                         username=user,
                         password_error='Invalid password')
@@ -472,8 +473,8 @@ class BlogPostHandler(Handler):
         post_id -- the post id for the post
         username -- the author of the post
         """
-        return not BlogPostLikes.has_user_liked(post_id, user.username) and \
-               not user.username == username
+        return (not BlogPostLikes.has_user_liked(post_id, user.username) and
+               not user.username == username)
 
     def get(self, blog_id):
         """Handles GET requests for '/blog/(d+)/?' page
@@ -578,7 +579,8 @@ class BlogPostHandler(Handler):
                             user=myuser,
                             can_like=False,
                             blogpost=post,
-                            errormsg="You must be logged in to delete a comment",
+                            errormsg="You must be logged "
+                                     "in to delete a comment",
                             comments=comments)
                 return
             elif cid:
@@ -589,12 +591,15 @@ class BlogPostHandler(Handler):
                     self.redirect('/blog/%s' % post.key().id())
                     return
                 else:
-                    can_like = self.can_user_like(myuser, blog_id, myuser.username)
+                    can_like = self.can_user_like(myuser,
+                                                  blog_id,
+                                                  myuser.username)
                     self.render("blogpost.html",
                                 user=myuser,
                                 can_like=can_like,
                                 blogpost=post,
-                                errormsg="You do not have permission to delete this post",
+                                errormsg="You do not have permission to "
+                                         "delete this post",
                                 comments=comments)
                     return
         # user is attempting to post a new comment
