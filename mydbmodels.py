@@ -64,11 +64,11 @@ class User(db.Model):
         Keyword Arguments:
         name -- username for desired User
         """
-        u = User.all().filter('username =', name).get()
-        return u
+        user = User.all().filter('username =', name).get()
+        return user
 
     @classmethod
-    def register(cls, name, pw, email=None):
+    def register(cls, name, passwrd, email=None):
         """Creates a User using the passed parameters and returns it
 
         Keyword Arguments:
@@ -76,28 +76,28 @@ class User(db.Model):
         pw -- the password for the user
         email -- the email for the user (defaults to None)
         """
-        if(not email):
+        if not email:
             email = None
-        pw_hash = cls.make_pw_hash(name, pw, cls.make_salt())
+        pw_hash = cls.make_pw_hash(name, passwrd, cls.make_salt())
         return User(username=name,
                     password=pw_hash,
                     email=email)
 
     @classmethod
-    def make_pw_hash(cls, name, pw, salt):
+    def make_pw_hash(cls, name, passwrd, salt):
         """Creates a password hash using the using a username, password and hash
 
         Keyword Arguments:
         name -- username
         pw -- password
         """
-        return hashlib.sha256(name+pw+salt+SECRET).hexdigest()+"|"+salt
+        return hashlib.sha256(name+passwrd+salt+SECRET).hexdigest()+"|"+salt
 
     @classmethod
     def make_salt(cls):
         """Generates a random 4 letter string to be used as a SALT"""
         retval = ""
-        for i in range(0,5):
+        for i in range(0, 5):
             retval = retval + random.choice(string.ascii_letters)
         return retval
 
@@ -124,8 +124,16 @@ class User(db.Model):
         return emails.count() != 0
 
 
-## User Blog Post Model
 class BlogPost(db.Model):
+    """Representation of a single blog post.
+
+    Parameters:
+    subject -- subject of blog post
+    blog -- text of the blog
+    created -- date created
+    username -- blog's author
+    like_count -- number of times the blog has been liked
+    """
     subject = db.StringProperty(required=True)
     blog = db.TextProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
@@ -134,38 +142,56 @@ class BlogPost(db.Model):
 
     @classmethod
     def latest_by_name(cls, name):
-        posts = db.GqlQuery("SELECT * FROM BlogPost WHERE username = '%s' "
-                            "ORDER BY created DESC LIMIT 10" % name)
+        """Retrieves latest 10 Blog Post by passed author
+
+        Keyword Arguments:
+        name -- username of author of posts to be retrieved
+        """
+        posts = db.GqlQuery("SELECT * FROM BlogPost WHERE username = :1 "
+                            "ORDER BY created DESC LIMIT 10", name)
         posts = list(posts)
         return posts
 
     @classmethod
-    def get_latest(cls, update = False):
+    def get_latest(cls, update=False):
+        """Retrieves latest 10 BlogPosts by all authors, unless update is True,
+        will retrieve it from the cache rather than from the database
+
+        Keyword Arguments:
+        update -- if True, retrieves data from database and updates cache
+        """
         posts = memcache.get('top')
         if posts is None or update:
             posts = db.GqlQuery("SELECT * FROM BlogPost "
-                                " ORDER BY created DESC LIMIT 10")
+                                " ORDER BY created DESC LIMIT 20")
             posts = list(posts)
             memcache.set('top_querytime', time.time())
             memcache.set('top', posts)
         return posts
 
     def formatted_date(self):
+        """Returns a string formatted version of the created date"""
         return self.created.strftime('%b %d, %Y')
 
     @classmethod
     def flush_cache(cls):
+        """Clears the BlogPost cache"""
         memcache.set('top', None)
 
     @classmethod
     def by_id(cls, bid):
+        """Returns a BlogPost by Id
+
+        Keyword Arguments:
+        bid -- BlogPost ID for the BlogPost to be retrieved
+        """
         return db.GqlQuery("SELECT * FROM BlogPost WHERE __key__ = KEY"
                            "(\'BlogPost\', %s)" % int(bid)).get()
 
 ## Blog Post Likes Model
 class BlogPostLikes(db.Model):
     post_key_id = db.IntegerProperty()
-    username = db.StringProperty(required = True)
+    username = db.StringProperty(required=True)
 
     @classmethod
     def has_user_liked(cls, post_id, user):
@@ -179,9 +205,9 @@ class BlogPostLikes(db.Model):
 ## Comment Model
 class Comment(db.Model):
     post_key_id = db.IntegerProperty()
-    author = db.StringProperty(required = True)
-    comment = db.TextProperty(required = True)
-    created = db.DateTimeProperty(auto_now_add = True)
+    author = db.StringProperty(required=True)
+    comment = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def get_comments_for_post(cls, post_id):
@@ -198,7 +224,3 @@ class Comment(db.Model):
 
     def formatted_date(self):
         return self.created.strftime('%b %d, %Y')
-
-
-
-
