@@ -17,10 +17,7 @@
 import random
 import hashlib
 import string
-import re
-import hmac
 import time
-import logging
 
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -188,16 +185,22 @@ class BlogPost(db.Model):
         return db.GqlQuery("SELECT * FROM BlogPost WHERE __key__ = KEY"
                            "(\'BlogPost\', %s)" % int(bid)).get()
 
-## Blog Post Likes Model
+
 class BlogPostLikes(db.Model):
+    """Keeps track of User's likes and which posts they have liked
+
+    Parameters:
+    post_key_id -- Key Id for Blog Post
+    username -- username of the User who liked
+    """
     post_key_id = db.IntegerProperty()
     username = db.StringProperty(required=True)
 
     @classmethod
     def has_user_liked(cls, post_id, user):
         likes = db.GqlQuery("SELECT * FROM BlogPostLikes "
-                            " WHERE post_key_id = %s AND "
-                            " username = '%s' " % (post_id, user))
+                            " WHERE post_key_id = :key AND "
+                            " username = :user ", key=post_id, user=user)
         likes = list(likes)
         return len(likes) > 0
 
