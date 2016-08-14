@@ -198,6 +198,13 @@ class BlogPostLikes(db.Model):
 
     @classmethod
     def has_user_liked(cls, post_id, user):
+        """Returns true if user has liked the BlogPost with the passed
+        BlogPost key id passed
+
+        Keyword Arguments:
+        post_id -- BlogPost key id
+        user -- username for user who the query is about
+        """
         likes = db.GqlQuery("SELECT * FROM BlogPostLikes "
                             " WHERE post_key_id = :key AND "
                             " username = :user ", key=post_id, user=user)
