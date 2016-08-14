@@ -353,8 +353,9 @@ class SignInHandler(Handler):
 
         # check if password matches, if fails
         salt = user_obj.password.split("|")[1]
-        if (not user_obj.password
-            == User.make_pw_hash(user, user_password, salt)):
+        if (not user_obj.password == User.make_pw_hash(user,
+                                                       user_password,
+                                                       salt)):
             self.render("signin.html",
                         username=user,
                         password_error='Invalid password')
@@ -474,7 +475,7 @@ class BlogPostHandler(Handler):
         username -- the author of the post
         """
         return (not BlogPostLikes.has_user_liked(post_id, user.username) and
-               not user.username == username)
+                not user.username == username) # pylint: disable=redefined-builtin
 
     def get(self, blog_id):
         """Handles GET requests for '/blog/(d+)/?' page
