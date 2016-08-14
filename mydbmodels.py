@@ -205,8 +205,15 @@ class BlogPostLikes(db.Model):
         return len(likes) > 0
 
 
-## Comment Model
 class Comment(db.Model):
+    """A comment on a BlogPost
+
+    Parameters:
+    post_key_id -- key id for the BlogPost that the comment refers to
+    author -- author of the Comment
+    comment -- text of the Comment
+    created -- creation date of the Comment
+    """
     post_key_id = db.IntegerProperty()
     author = db.StringProperty(required=True)
     comment = db.TextProperty(required=True)
@@ -214,6 +221,11 @@ class Comment(db.Model):
 
     @classmethod
     def get_comments_for_post(cls, post_id):
+        """Retrieves all Comments for a BlogPost
+
+        Keyword Arguments:
+        post_id -- key id for the BlogPost
+        """
         comm = db.GqlQuery("SELECT * FROM Comment "
                            "WHERE post_key_id = %s "
                            "ORDER BY created DESC " % post_id)
@@ -222,8 +234,14 @@ class Comment(db.Model):
 
     @classmethod
     def by_id(cls, cid):
+        """Retrieves Comment by its key id
+
+        Keyword Arguments:
+        cid -- key id for the Comment
+        """
         return db.GqlQuery("SELECT * FROM Comment WHERE __key__ = KEY"
                            "(\'Comment\', %s)" % int(cid)).get()
 
     def formatted_date(self):
+        """Returns the created date as a formatted String"""
         return self.created.strftime('%b %d, %Y')
