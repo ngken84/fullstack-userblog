@@ -15,6 +15,12 @@
 # limitations under the License.
 #
 
+"""
+main.py
+
+Initializes JINJA and contains all the Web Page Handlers
+"""
+
 import os
 import re
 import hmac

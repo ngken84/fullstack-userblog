@@ -14,6 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+
+"""
+mydbmodels.py
+
+Contains all the Database Models for the Blog Application
+"""
+
+
 import random
 import hashlib
 import string
