@@ -14,8 +14,9 @@ that allows users to :
 * Edit their comments
 * Delete their comments
 
-** Set Up
-1. Install Google App Engine https://cloud.google.com/appengine/downloads
+## Set Up
+1. Install Google App Engine
+  * https://cloud.google.com/appengine/downloads
 2. Import the Project into Google App Engine
 3. Create a project called "fullstack-userblog" in your Google App Engine cloud
 4. Select the project in Google App Engine and click "Deploy"
