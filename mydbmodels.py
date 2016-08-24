@@ -125,7 +125,7 @@ class User(db.Model):
         Keyword Arguments:
         email -- email to be checked to see if exists
         """
-        emails = db.GqlQuery("SELECT * FROM User WHERE email =:1"
+        emails = db.GqlQuery("SELECT * FROM User WHERE email =:1 "
                              "LIMIT 1", email)
         return emails.count() != 0
 
