@@ -215,8 +215,8 @@ class BlogPostLikes(db.Model):
         user -- username for user who the query is about
         """
         likes = db.GqlQuery("SELECT * FROM BlogPostLikes "
-                            " WHERE post_key_id = :key AND "
-                            " username = :user ", key=post_id, user=user)
+                            " WHERE post_key_id = %s AND "
+                            " username = '%s' " % (post_id, user))
         likes = list(likes)
         return len(likes) > 0
 
